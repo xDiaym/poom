@@ -1,0 +1,12 @@
+# IDE files
+/.idea/
+
+# Python files
+/venv/
+**__pycache__/
+
+# Testing, linting, coverage, etc.
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
