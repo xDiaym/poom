@@ -13,16 +13,36 @@ from poom.viewer import Viewer
 
 SCREEN_SIZE = WIDTH, HEIGHT = 800, 600
 FOV = radians(90)
-root = Path(os.getcwd())
+root = Path(os.getcwd()).parent
+
+
+def display_fps(
+    surface: pg.Surface,
+    font: pg.font.Font,
+    fps: float,
+    size: int = 32
+) -> None:
+    color = "red"
+    if fps >= 30:
+        color = "yellow"
+    elif fps >= 60:
+        color = "green"
+
+    fps = font.render("%2.f" % fps, True, color)
+    surface.blit(fps, (0, 0))
 
 
 def game_loop() -> None:
     pg.init()
+    pg.font.init()
+
     screen = pg.display.set_mode(SCREEN_SIZE, vsync=1)
+    font = pg.font.SysFont('Comic Sans', 30)
 
     player = Viewer(pg.Vector2(1.0, 1.0), radians(30))
     map_loader = MapLoader(root / "assets" / "levels")
     map_ = map_loader.load(1)
+    clock = pg.time.Clock()
 
     run = True
     while run:
@@ -48,7 +68,10 @@ def game_loop() -> None:
                 (x, HEIGHT // 2 + half_height),
             )
 
+        display_fps(screen, font, clock.get_fps())
+
         pg.display.flip()
+        clock.tick()
     pg.quit()
 
 
