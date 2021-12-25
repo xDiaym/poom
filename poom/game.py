@@ -1,35 +1,30 @@
 import os
-from math import cos, sin, radians
+from math import cos, radians
 from pathlib import Path
 from typing import List
 
 import pygame as pg
-from pygame.math import Vector2
 
-from poom.core import ray_march
 from poom.map_loader import MapLoader
+from poom.ray_march import ray_march
 from poom.viewer import Viewer
-
 
 SCREEN_SIZE = WIDTH, HEIGHT = 800, 600
 FOV = radians(90)
-root = Path(os.getcwd()).parent
+root = Path(os.getcwd())
 
 
 def display_fps(
-    surface: pg.Surface,
-    font: pg.font.Font,
-    fps: float,
-    size: int = 32
+    surface: pg.Surface, font: pg.font.Font, fps: float, size: int = 32
 ) -> None:
     color = "red"
     if fps >= 30:
         color = "yellow"
-    elif fps >= 60:
+    if fps >= 60:
         color = "green"
 
-    fps = font.render("%2.f" % fps, True, color)
-    surface.blit(fps, (0, 0))
+    fps_image = font.render("%2.f" % fps, True, color)
+    surface.blit(fps_image, (0, 0))
 
 
 def game_loop() -> None:
@@ -37,11 +32,11 @@ def game_loop() -> None:
     pg.font.init()
 
     screen = pg.display.set_mode(SCREEN_SIZE, vsync=1)
-    font = pg.font.SysFont('Comic Sans', 30)
+    font = pg.font.SysFont("Comic Sans", 30)
 
     player = Viewer(pg.Vector2(1.0, 1.0), radians(30))
     map_loader = MapLoader(root / "assets" / "levels")
-    map_ = map_loader.load(1)
+    map_ = map_loader.as_numpy(1)
     clock = pg.time.Clock()
 
     run = True
@@ -57,7 +52,8 @@ def game_loop() -> None:
             alpha = x / WIDTH * FOV
             angle = player.angle - FOV / 2 + alpha
 
-            dist = ray_march(map_, player.position, Vector2(cos(angle), sin(angle)))
+            x0, y0 = player.position.xy
+            dist = ray_march(map_, x0, y0, angle)
             half_height = (
                 int(HEIGHT / (dist * cos(angle - player.angle))) // 2
             )  # TODO: fix parabola-like walls

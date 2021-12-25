@@ -1,8 +1,7 @@
 import numpy as np
+
 cimport numpy as np
-from libc.math cimport sin, cos, sqrt
-
-
+from libc.math cimport cos, sin, sqrt
 
 # TODO: check performance without numpy
 # TODO: create Vec2 class/struct

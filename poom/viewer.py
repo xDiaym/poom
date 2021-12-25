@@ -1,4 +1,4 @@
-from math import sin, cos
+from math import cos, sin
 
 from pygame.math import Vector2
 

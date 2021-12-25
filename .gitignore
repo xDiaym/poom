@@ -5,6 +5,11 @@
 /venv/
 **__pycache__/
 
+# Cython extension
+build/
+**.c
+**.so
+
 # Testing, linting, coverage, etc.
 .mypy_cache/
 .pytest_cache/
