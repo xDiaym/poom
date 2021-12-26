@@ -28,4 +28,3 @@ class MapLoader:
         string_list = self.as_list(number)
         array = map2d(string_list, lambda x: 0 if x != "W" else 1)
         return np.array(array, dtype=np.int8)
-

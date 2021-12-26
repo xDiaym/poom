@@ -1,7 +1,8 @@
-import numpy
-from setuptools import setup
 from distutils.extension import Extension
+
+import numpy
 from Cython.Build import cythonize
+from setuptools import setup
 
 
 def read(filename: str) -> str:
