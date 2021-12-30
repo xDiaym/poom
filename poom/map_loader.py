@@ -5,6 +5,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 T = TypeVar("T")
+Map = NDArray[np.int8]
 
 
 def map2d(matrix: List[str], fn: Callable[[str], T]) -> List[List[T]]:
@@ -21,7 +22,7 @@ class MapLoader:
     def as_list(self, number: int) -> List[str]:
         path = self._root / str(number) / "map.txt"
         with open(path) as fp:
-            content = fp.read()
+            content = fp.read().strip()
         return content.split("\n")
 
     def as_numpy(self, number: int) -> NDArray[np.int8]:

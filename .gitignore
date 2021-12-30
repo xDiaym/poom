@@ -11,6 +11,7 @@ build/
 **.so
 
 # Testing, linting, coverage, etc.
+/cython_debug/
 .mypy_cache/
 .pytest_cache/
 .coverage
