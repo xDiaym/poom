@@ -1,10 +1,16 @@
 import numpy as np
 from numpy.typing import NDArray
+import pygame as pg
 
-def ray_march(
-    map_: NDArray[np.int8],
+
+def draw_wall_line(
+    map_: NDArray[np.uint8],
+    surface: pg.Surface,
+    texture: pg.Surface,
     x0: float,
     y0: float,
-    angle: float,
-    detalization: int = 20,
-) -> float: ...
+    view: float,
+    fov: float,
+    detalization: int = 20
+) -> None:
+    ...
