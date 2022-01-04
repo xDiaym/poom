@@ -1,11 +1,23 @@
 #cython: language_level=3
+import cython
 import numpy as np
 
 cimport numpy as np
-from libc.math cimport cos, sin, sqrt
+from libc.math cimport tan, sqrt, cos, sin
 
-# TODO: check performance without numpy
-# TODO: create Vec2 class/struct
+cdef int sign(float x):
+    return (0 < x) - (x < 0)
+
+cdef float sqr(float x):
+    return x * x
+
+cdef struct Vec2i:
+    int x
+    int y
+
+cdef struct Vec2f:
+    float x
+    float y
 
 cdef float magnitude(float x0, float y0, float x1, float y1):
     cdef float dx = x1 - x0
@@ -13,26 +25,36 @@ cdef float magnitude(float x0, float y0, float x1, float y1):
     return sqrt(dx * dx + dy * dy)
 
 
+@cython.cdivision(True)
 def ray_march(
     np.ndarray[np.int8_t, ndim=2] map_,
     float x0,
     float y0,
     float angle,
-    int detalization = 20,
+    float max_distance = 35.0,
 ) -> float:
     # FIXME: optimize
-    cdef int max_size = 15
-    cdef float step_x = cos(angle)
-    cdef float step_y = sin(angle)
-    cdef float px = x0
-    cdef float py = y0
-    cdef float m = 0
+    cdef float distance = 0
+    cdef float tangent = sqr(tan(angle)) or 1e-6
+    cdef Vec2i direction = Vec2i(sign(cos(angle)), sign(sin(angle)))
+    cdef Vec2f ray_step = Vec2f(
+        sqrt(1 + tangent) * direction.x,
+        # '1/tan(x) = cot(x)' and '(1 / x)^2 == 1 / x^2'
+        sqrt(1 + 1 / tangent) * direction.y
+    )
+    cdef Vec2f ray = Vec2f(x0, y0)
+    cdef Vec2i coords = Vec2i(<int>x0, <int>y0)
 
-    cdef int i = 0
-    for i in range(max_size * detalization):
-        m = i / <float> detalization
-        px = x0 + step_x * m
-        py = y0 + step_y * m
-        if map_[<int>py, <int>px] != 0:  # TODO: add cell descriptor
-            return magnitude(x0, y0, px, py)
-    return 1e6
+    while distance < max_distance:
+        if ray.x < ray.y:
+            coords.x += direction.x
+            distance += ray.x
+            ray.x += ray_step.x
+        else:
+            coords.y += direction.y
+            distance += ray.y
+            ray.y += ray_step.y
+        #print(ray.x, ray.y)
+        if map_[coords.y, coords.x] == 1:
+            return distance
+    return max_distance

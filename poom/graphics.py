@@ -54,8 +54,8 @@ class WallRenderer(AbstractRenderer):
             x0, y0 = self._viewer.position
             dist = ray_march(self._map, x0, y0, angle)
             half_height = (
-                int(height / (dist * cos(angle - self._viewer.angle))) // 2
-            )  # TODO: fix parabola-like walls
+                int(height / (dist * cos(angle - self._viewer.angle)))
+            )  # TODO: fix hyperbola-like walls
             pg.draw.line(
                 surface,
                 "white",

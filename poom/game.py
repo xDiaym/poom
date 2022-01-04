@@ -32,6 +32,7 @@ def game_loop() -> None:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
+        player._position += pg.Vector2(0.01, 0.01)
 
         pipeline.render(screen)
 

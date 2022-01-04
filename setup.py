@@ -11,6 +11,6 @@ def read(filename: str) -> str:
 setup(
     name="poom",
     description=read("README.md"),
-    ext_modules=cythonize("poom/ray_march.pyx", language_level="3"),
+    ext_modules=cythonize("poom/ray_march.pyx", language_level="3", gdb_debug=True),
     include_dirs=numpy.get_include(),
 )
