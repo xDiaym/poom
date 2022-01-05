@@ -1,0 +1,68 @@
+	
+
+ {
+    "label":
+    {
+        "colours":
+        {   "normal_text": "#ff2400",
+            "dark_bg": "#00000000"
+        },
+        "font":
+        {   "name": "BeautifulWorldNBP",
+            "size": 70,
+            "regular_path": "assets/font.ttf"
+        }
+    },
+    "#poom":
+    {
+        "font":
+        {   "name": "BeautifulWorldNBP",
+            "size": 100,
+            "regular_path": "assets/font.ttf"
+        }
+    },
+    "#sublabel":
+    {
+        "font":
+        {   "name": "BeautifulWorldNBP",
+            "size": 30,
+            "regular_path": "assets/font.ttf"
+        }
+    },
+    "button":
+    {   
+        "colours": 
+        {
+            "normal_text": "#ff2400",
+            "normal_bg": "#2f353b"
+
+        },
+        "font":
+        {
+            "name": "BeautifulWorldNBP",
+            "size": 40,
+            "regular_path": "assets/font.ttf"
+        },
+        "misc":
+        {
+            "border_width": "3"
+        }
+    },
+    "drop_down_menu.#drop_down_options_list.button":
+    {   
+       
+        "font":
+        {
+            "name": "BeautifulWorldNBP",
+            "size": 20,
+            "regular_path": "assets/font.ttf"
+        }
+    },
+    "horizontal_slider":
+    {
+        "misc": 
+        {
+            "enable_arrow_buttons": "0"
+        }
+    }
+}
