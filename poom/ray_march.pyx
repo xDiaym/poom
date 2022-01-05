@@ -6,7 +6,7 @@ cimport numpy as np
 from libc.math cimport tan, sqrt, cos, sin
 
 cdef int sign(float x):
-    return (0 < x) - (x < 0)
+    return 1 if x >= 0 else -1
 
 cdef float sqr(float x):
     return x * x
@@ -35,26 +35,26 @@ def ray_march(
 ) -> float:
     # FIXME: optimize
     cdef float distance = 0
-    cdef float tangent = sqr(tan(angle)) or 1e-6
     cdef Vec2i direction = Vec2i(sign(cos(angle)), sign(sin(angle)))
-    cdef Vec2f ray_step = Vec2f(
-        sqrt(1 + tangent) * direction.x,
-        # '1/tan(x) = cot(x)' and '(1 / x)^2 == 1 / x^2'
-        sqrt(1 + 1 / tangent) * direction.y
-    )
-    cdef Vec2f ray = Vec2f(x0, y0)
+    cdef float tangent = sqr(tan(angle)) or 1e-6
+    # '1/tan(x) = cot(x)' and '(1 / x)^2 == 1 / x^2'
+    cdef Vec2f ray_step = Vec2f(sqrt(1 + tangent), sqrt(1 + 1 / tangent))
     cdef Vec2i coords = Vec2i(<int>x0, <int>y0)
+    cdef Vec2f ray = Vec2f(
+        (x0 - coords.x if direction.x < 0 else coords.x + 1 - x0) * ray_step.x,
+        (y0 - coords.y if direction.y < 0 else coords.y + 1 - y0) * ray_step.y
+    )
 
     while distance < max_distance:
         if ray.x < ray.y:
             coords.x += direction.x
-            distance += ray.x
+            distance = ray.x
             ray.x += ray_step.x
         else:
             coords.y += direction.y
-            distance += ray.y
+            distance = ray.y
             ray.y += ray_step.y
-        #print(ray.x, ray.y)
+
         if map_[coords.y, coords.x] == 1:
             return distance
     return max_distance
