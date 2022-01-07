@@ -7,9 +7,6 @@ cimport numpy as np
 from libc.math cimport cos, sin, sqrt, tan
 
 
-cdef float cmax(float x, float y):
-    return x if x > y else y
-
 cdef float frac(float x):
     return x - <int>x
 
@@ -88,7 +85,7 @@ cdef Intersection ray_march(
 # Ignore zero division errors due to performance reasons
 # TODO: assert zero detalization
 @cython.cdivision(True)
-def draw_wall_line(
+def draw_walls(
     np.ndarray[np.int8_t, ndim=2] map_,
     surface: pg.Surface,
     texture: pg.Surface,

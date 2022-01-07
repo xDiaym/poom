@@ -6,7 +6,7 @@ from typing import List, Optional
 import pygame as pg
 
 from poom.map_loader import Map
-from poom.ray_march import draw_wall_line
+from poom.ray_march import draw_walls
 from poom.viewer import Viewer
 
 
@@ -15,7 +15,7 @@ class AbstractRenderer(ABC):
 
     @abstractmethod
     def __call__(self, surface: pg.Surface) -> None:
-        """Method for redering."""
+        """Method for rendering."""
 
 
 class FPSRenderer(AbstractRenderer):
@@ -50,11 +50,10 @@ class WallRenderer(AbstractRenderer):
 
     # TODO(optimization): rewrite it in Cython
     def __call__(self, surface: pg.Surface) -> None:
-        width, height = surface.get_size()
         x, y = self._viewer.position
         angle = self._viewer.angle
         fov = self._viewer.fov
-        draw_wall_line(self._map, surface, self._texture, x, y, angle, fov)
+        draw_walls(self._map, surface, self._texture, x, y, angle, fov)
 
 
 class Pipeline:
