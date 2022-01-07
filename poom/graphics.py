@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from math import cos
 from typing import List, Optional
@@ -5,7 +6,7 @@ from typing import List, Optional
 import pygame as pg
 
 from poom.map_loader import Map
-from poom.ray_march import ray_march
+from poom.ray_march import draw_wall_line
 from poom.viewer import Viewer
 
 
@@ -44,24 +45,16 @@ class WallRenderer(AbstractRenderer):
     def __init__(self, map_: Map, viewer: Viewer) -> None:
         self._map = map_
         self._viewer = viewer  # ??? maybe use RenderContext?
+        path = os.path.abspath("./assets/textures/wall.png")
+        self._texture = pg.image.load(path)
 
     # TODO(optimization): rewrite it in Cython
     def __call__(self, surface: pg.Surface) -> None:
         width, height = surface.get_size()
-        for x in range(width):
-            alpha = x / width * self._viewer.fov
-            angle = self._viewer.angle - self._viewer.fov / 2 + alpha
-            x0, y0 = self._viewer.position
-            dist = ray_march(self._map, x0, y0, angle)
-            half_height = (
-                int(height / (dist * cos(angle - self._viewer.angle)))
-            )  # TODO: fix hyperbola-like walls
-            pg.draw.line(
-                surface,
-                "white",
-                (x, height // 2 - half_height),
-                (x, height // 2 + half_height),
-            )
+        x, y = self._viewer.position
+        angle = self._viewer.angle
+        fov = self._viewer.fov
+        draw_wall_line(self._map, surface, self._texture, x, y, angle, fov)
 
 
 class Pipeline:

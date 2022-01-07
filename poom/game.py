@@ -40,7 +40,7 @@ def game_loop() -> None:
         if keys[pg.K_a]:
             player._angle -= dt * 5
         if keys[pg.K_d]:
-            player._angle +a= dt * 5
+            player._angle += dt * 5
         pipeline.render(screen)
 
         dt = clock.tick() / 1000
