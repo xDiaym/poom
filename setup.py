@@ -1,10 +1,11 @@
 import numpy
-from Cython.Build import cythonize
 from setuptools import setup
+
+from Cython.Build import cythonize  # isort: skip strange build system bug
 
 
 def read(filename: str) -> str:
-    with open(filename, "r") as fp:
+    with open(filename, "r", encoding="utf8") as fp:
         return fp.read()
 
 
