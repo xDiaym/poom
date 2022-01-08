@@ -23,7 +23,7 @@ def game_loop() -> None:
     map_loader = MapLoader(root / "assets" / "levels")
     map_ = map_loader.as_numpy(1)
     clock = pg.time.Clock()
-
+    dt = 0
     pipeline = Pipeline([WallRenderer(map_, player), FPSRenderer(clock)])
 
     run = True
@@ -32,10 +32,18 @@ def game_loop() -> None:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
-
+        keys = pg.key.get_pressed()
+        if keys[pg.K_w]:
+            player._position += player.view_vector * dt * 5
+        if keys[pg.K_s]:
+            player._position -= player.view_vector * dt * 5
+        if keys[pg.K_a]:
+            player._angle -= dt * 5
+        if keys[pg.K_d]:
+            player._angle += dt * 5
         pipeline.render(screen)
 
-        clock.tick()
+        dt = clock.tick() / 1000
     pg.quit()
 
 
