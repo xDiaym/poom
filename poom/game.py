@@ -23,7 +23,7 @@ def game_loop() -> None:
     map_loader = MapLoader(root / "assets" / "levels")
     map_ = map_loader.as_numpy(1)
     clock = pg.time.Clock()
-    dt = 0
+    dt: float = 0
     pipeline = Pipeline([WallRenderer(map_, player), FPSRenderer(clock)])
 
     run = True
