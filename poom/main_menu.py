@@ -1,25 +1,28 @@
+import json
 from abc import ABC, abstractmethod
-from os import getcwd
+from os import getcwd, listdir
 from pathlib import Path
 
 import pygame as pg
 import pygame_gui
+from pygame_gui.core import ObjectID
 from pygame_gui.elements import (
-    UILabel,
     UIButton,
     UIDropDownMenu,
     UIHorizontalSlider,
+    UILabel,
     UITextBox,
 )
-from pygame_gui.core import ObjectID
-from os import listdir
 
 # "#2f353b"
 pg.init()
-size = width, height = 800, 600
+root = Path(getcwd())
+with open(root / "assets" / "settings.json") as file:
+    exchanger = json.load(file)
+width, height = exchanger["screen_size"]
+size = width, height
 screen = pg.display.set_mode(size)
 pg.display.set_caption("Greeting")
-root = Path(getcwd())
 background = pg.transform.scale(
     pg.image.load(root / "assets" / "back.png").convert_alpha(), (width, height)
 )
@@ -31,16 +34,7 @@ def clamp(low, high, value):
     return max(min(high, value), low)
 
 
-class SingletonManager(pygame_gui.UIManager):
-    _instances = {}
-
-    def __call__(cls, size, style_dir):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(SingletonManager, cls).__call__(size, style_dir)
-        return cls._instances[cls]
-
-
-manager = SingletonManager(size, root / "assets" / "style.json")
+manager = pygame_gui.UIManager(size, root / "assets" / "style.json")
 
 
 class Animation:
@@ -236,8 +230,8 @@ class SettingsScene(AbstractScene):
         )
         self.graphics = UIDropDownMenu(
             ["Low", "Medium", "High"],
-            "Low",
-            pg.Rect((width - 200) // 2, height * 0.3, 200, 50),
+            exchanger["quality"],
+            pg.Rect((width - 200) // 2, height * 0.23 + 40, 200, 50),
             manager,
         )
         self.screen_size_lbl = UILabel(
@@ -248,8 +242,8 @@ class SettingsScene(AbstractScene):
         )
         self.screen_size = UIDropDownMenu(
             ["800x600 (4:3)", "1024x768 (4:3)", "1280x720 (16:9)"],
-            "800x600 (4:3)",
-            pg.Rect((width - 200) // 2, height * 0.47, 290, 50),
+            f"{width}x{height} ({exchanger['ratio']})",
+            pg.Rect((width - 200) // 2, height * 0.4 + 40, 290, 50),
             manager,
         )
         self.volume_lbl = UILabel(
@@ -259,14 +253,14 @@ class SettingsScene(AbstractScene):
             object_id=ObjectID(object_id="#sublabel"),
         )
         self.volume = UIHorizontalSlider(
-            pg.Rect((width - 200) // 2, height * 0.65, 270, 30),
-            0.5,
+            pg.Rect((width - 200) // 2, height * 0.58 + 40, 270, 30),
+            exchanger["volume"] / 100,
             range(101),
             manager,
         )
         self.current_volume = UILabel(
-            pg.Rect(width * 0.7, height * 0.635, 100, 50),
-            "50 %",
+            pg.Rect((width - 200) // 2 + 260, height * 0.58 + 32, 100, 50),
+            f"{exchanger['volume']} %",
             manager,
             object_id=ObjectID(object_id="#sublabel"),
         )
@@ -278,18 +272,46 @@ class SettingsScene(AbstractScene):
         )
         self.fps = UIDropDownMenu(
             ["on", "off"],
-            "off",
-            pg.Rect((width - 200) // 2, height * 0.78, 150, 50),
+            "off" if not exchanger["fps_tick"] else "on",
+            pg.Rect((width - 200) // 2, height * 0.71 + 40, 150, 50),
             manager,
         )
 
     def on_click(self, event) -> None:
+        global screen, width, height, size, background, manager
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             self.current_volume.set_text(f"{int(self.volume.current_value * 100)} %")
+            exchanger["volume"] = int(self.volume.current_value * 100)
+            pg.mixer.music.set_volume(self.volume.current_value)
+            with open(root / "assets" / "settings.json", "w") as file:
+                json.dump(exchanger, file)
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.back:
                 manager.clear_and_reset()
                 self._context.scene = WelcomeScene(self._context, self.zombie)
+        if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+            if event.ui_element == self.graphics:
+                exchanger["quality"] = self.graphics.selected_option
+            if event.ui_element == self.screen_size:
+                new_size, ratio = self.screen_size.selected_option.split()
+                width, height = map(int, new_size.split("x"))
+                size = width, height
+                background = pg.transform.scale(
+                    pg.image.load(root / "assets" / "back.png").convert_alpha(),
+                    (width, height),
+                )
+                screen = pg.display.set_mode(size)
+                self.zombie.rect.y = height - self.zombie.image.get_height()
+                exchanger["screen_size"] = [width, height]
+                exchanger["ratio"] = ratio[1:-1]
+                manager = pygame_gui.UIManager(size, root / "assets" / "style.json")
+                self._context.scene = SettingsScene(self._context, self.zombie)
+            if event.ui_element == self.fps:
+                exchanger["fps_tick"] = (
+                    True if self.fps.selected_option == "on" else False
+                )
+            with open(root / "assets" / "settings.json", "w") as file:
+                json.dump(exchanger, file)
 
     def render(self, surface: pg.Surface) -> None:
         self.zombie.group.draw(surface)
@@ -339,6 +361,7 @@ sc = SceneContext()
 
 pg.mixer.init()
 pg.mixer.music.load(root / "assets" / "main.mp3")
+pg.mixer.music.set_volume(exchanger["volume"] / 100)
 pg.mixer.music.play(-1)
 
 while running:
