@@ -45,15 +45,17 @@ class WallRenderer(AbstractRenderer):
     def __init__(self, map_: Map, viewer: Viewer) -> None:
         self._map = map_
         self._viewer = viewer  # ??? maybe use RenderContext?
-        path = os.path.abspath("./assets/textures/wall.png")
-        self._texture = pg.image.load(path)
 
-    # TODO(optimization): rewrite it in Cython
+        # Use image loader instead of this garbage
+        path1 = os.path.abspath("./assets/textures/1.png")
+        path2 = os.path.abspath("./assets/textures/2.png")
+        self._textures = [pg.image.load(path1), pg.image.load(path2)]
+
     def __call__(self, surface: pg.Surface) -> None:
         x, y = self._viewer.position
         angle = self._viewer.angle
         fov = self._viewer.fov
-        draw_walls(self._map, surface, self._texture, x, y, angle, fov)
+        draw_walls(self._map, surface, self._textures, x, y, angle, fov)
 
 
 class Pipeline:

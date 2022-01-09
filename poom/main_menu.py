@@ -1,18 +1,17 @@
 from abc import ABC, abstractmethod
-from os import getcwd
+from os import getcwd, listdir
 from pathlib import Path
 
 import pygame as pg
 import pygame_gui
+from pygame_gui.core import ObjectID
 from pygame_gui.elements import (
-    UILabel,
     UIButton,
     UIDropDownMenu,
     UIHorizontalSlider,
+    UILabel,
     UITextBox,
 )
-from pygame_gui.core import ObjectID
-from os import listdir
 
 # "#2f353b"
 pg.init()
