@@ -27,5 +27,5 @@ class MapLoader:
 
     def as_numpy(self, number: int) -> NDArray[np.int8]:
         string_list = self.as_list(number)
-        array = map2d(string_list, lambda x: 0 if x != "W" else 1)
+        array = map2d(string_list, lambda x: 0 if x == "." else int(x))
         return np.array(array, dtype=np.int8)

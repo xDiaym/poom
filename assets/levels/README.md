@@ -1,6 +1,6 @@
 # Map markup language
 
-| Symbol | Meaning    |
-|:-------|:-----------|
-| `.`    | Empty cell |
-| `W`    | Wall       |
+| Symbol | Meaning    | Example |
+|:-------|:-----------|:--------|
+| `.`    | Empty cell | `.`     |
+| `W`    | Wall       | `42`    |
