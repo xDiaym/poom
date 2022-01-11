@@ -1,12 +1,11 @@
 import os
 from abc import ABC, abstractmethod
-from math import cos
 from typing import List, Optional
 
 import pygame as pg
 
 from poom.map_loader import Map
-from poom.ray_march import draw_walls
+from poom.pooma.ray_march import draw_walls
 from poom.viewer import Viewer
 
 

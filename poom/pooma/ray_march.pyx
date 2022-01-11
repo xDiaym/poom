@@ -7,13 +7,18 @@ import pygame as pg
 
 cimport numpy as np
 from libc.math cimport cos, sin, sqrt, tan
-from poom.math cimport Vec2f, Vec2i, frac, sign
 
+from poom.pooma.math cimport Vec2f, Vec2i, frac, sign
+
+__all__ = (
+    "draw_walls"
+)
 
 cdef struct Intersection:
     float distance
     float offset
     char texture_index
+
 
 
 # TODO: assert zero division

@@ -10,14 +10,17 @@ def read(filename: str) -> str:
         return fp.read()
 
 
-pooma = Extension(
-    name="pooma",
-    sources=["poom/ray_march.pyx", "poom/math.pyx"],
-)
+extensions = [
+    Extension(
+        name="poom.pooma.ray_march",
+        sources=["poom/pooma/ray_march.pyx"],
+    ),
+    Extension(name="poom.pooma.math", sources=["poom/pooma/math.pyx"]),
+]
 
 setup(
     name="poom",
     description=read("README.md"),
-    ext_modules=cythonize(pooma, language_level=3),
+    ext_modules=cythonize(extensions, language_level=3),
     include_dirs=numpy.get_include(),
 )
