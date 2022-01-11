@@ -7,30 +7,7 @@ import pygame as pg
 
 cimport numpy as np
 from libc.math cimport cos, sin, sqrt, tan
-
-
-cdef float frac(float x):
-    return x - <int>x
-
-cdef int sign(float x):
-    return 1 if x >= 0 else -1
-
-cdef float sqr(float x):
-    return x * x
-
-
-cdef struct Vec2i:
-    int x
-    int y
-
-cdef struct Vec2f:
-    float x
-    float y
-
-cdef float magnitude(Vec2f u, Vec2f v):
-    cdef float dx = u.x - v.x
-    cdef float dy = u.y - v.y
-    return sqrt(dx * dx + dy * dy)
+from poom.math cimport Vec2f, Vec2i, frac, sign
 
 
 cdef struct Intersection:
@@ -52,7 +29,7 @@ cdef Intersection ray_march(
     cdef int is_vertical = 0
 
     cdef Vec2i direction = Vec2i(sign(cos(angle)), sign(sin(angle)))
-    cdef float tangent = sqr(tan(angle)) or 1e-6
+    cdef float tangent = max(tan(angle) ** 2, 1e-6)
     # '1/tan(x) = cot(x)' and '(1 / x)^2 == 1 / x^2'
     cdef Vec2f ray_step = Vec2f(sqrt(1 + tangent), sqrt(1 + 1 / tangent))
     cdef Vec2i coords = Vec2i(<int>x0, <int>y0)
