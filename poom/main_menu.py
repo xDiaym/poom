@@ -1,8 +1,7 @@
 import json
-from abc import ABC, abstractmethod
 from os import getcwd, listdir
+from shared import SceneContext, ScreenResizer, AbstractScene
 from pathlib import Path
-
 import pygame as pg
 import pygame_gui
 from pygame_gui.core import ObjectID
@@ -15,25 +14,13 @@ from pygame_gui.elements import (
 )
 
 
-class ScreenResizer:
-    def __init__(self, width, height) -> None:
-        self.resize(width, height)
-
-    def resize(self, width, height) -> None:
-        self.size = self.width, self.height = width, height
-        self.surface = pg.display.set_mode(self.size)
-        self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "back.png").convert_alpha(), (width, height)
-        )
-        self.manager = pygame_gui.UIManager(self.size, root / "assets" / "style.json")
-
-
 # "#2f353b"
 pg.init()
 root = Path(getcwd())
+print(root)
 with open(root / "assets" / "settings.json") as file:
     settings = json.load(file)
-screen = ScreenResizer(*settings["screen_size"])
+screen = ScreenResizer(*settings["screen_size"], root)
 pg.display.set_caption("Greeting")
 running = True
 clock = pg.time.Clock()
@@ -122,44 +109,6 @@ class Zombie(pg.sprite.Sprite):
                 self.x = clamp(1, screen.width - self.image.get_width() - 1, self.x)
                 self.left = not self.left
                 self.rotate = False
-
-
-class AbstractScene(ABC):
-    def __init__(self, context: "SceneContext") -> None:
-        self._context = context
-
-    @abstractmethod
-    def on_click(self, event) -> None:
-        pass
-
-    @abstractmethod
-    def update(self, dt: float) -> None:
-        pass
-
-    @abstractmethod
-    def render(self, render: pg.Surface) -> None:
-        pass
-
-
-class SceneContext:
-    def __init__(self) -> None:
-        self._scene = WelcomeScene(self)
-
-    @property
-    def scene(self) -> AbstractScene:
-        return self._scene
-
-    @scene.setter
-    def scene(self, value: AbstractScene) -> None:
-        self._scene = value
-
-    def handler(self, event) -> None:
-        self._scene.on_click(event)
-
-    def render(self) -> None:
-        screen.surface.blit(screen.background, (0, 0))
-        self._scene.render(screen.surface)
-        self._scene.update(clock.tick() / 1000)
 
 
 class WelcomeScene(AbstractScene):
@@ -304,7 +253,7 @@ class SettingsScene(AbstractScene):
             if event.ui_element == self.screen_size:
                 new_size, ratio = self.screen_size.selected_option.split()
                 width, height = map(int, new_size.split("x"))
-                screen.resize(width, height)
+                screen.resize(width, height, root)
                 self.zombie.rect.y = height - self.zombie.image.get_height()
                 settings["screen_size"] = [width, height]
                 settings["ratio"] = ratio[1:-1]
@@ -365,8 +314,7 @@ class StatiscticsScene(AbstractScene):
         screen.manager.update(0)
 
 
-sc = SceneContext()
-
+sc = SceneContext(WelcomeScene)
 pg.mixer.init()
 pg.mixer.music.load(root / "assets" / "main.mp3")
 pg.mixer.music.set_volume(settings["volume"] / 100)
@@ -382,6 +330,6 @@ while running:
             pg.mixer.music.unpause()
         sc.handler(event)
         screen.manager.process_events(event)
-    sc.render()
+    sc.render(screen, clock)
 
     pg.display.update()
