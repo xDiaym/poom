@@ -1,0 +1,8 @@
+[pydocstyle]
+# Disabled checks:
+# D100: Missing docstring in public module
+# D102: Missing docstring in public method (will be handled by others)
+# D103: Missing docstring in public function (will be handled by others)
+# D105: Missing docstring in magic method (will be handled by others)
+# D209: Blank line before closing """ (removed from PEP257)
+ignore = D100,D102,D103,D104,D105,D209
