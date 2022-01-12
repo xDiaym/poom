@@ -14,6 +14,7 @@ extensions = [
     Extension(
         name="poom.pooma.ray_march",
         sources=["poom/pooma/ray_march.pyx"],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
     ),
     Extension(name="poom.pooma.math", sources=["poom/pooma/math.pyx"]),
 ]
