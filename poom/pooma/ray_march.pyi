@@ -7,6 +7,7 @@ from numpy.typing import NDArray
 def draw_walls(
     map_: NDArray[np.int8],
     surface: pg.Surface,
+    stencil: NDArray[np.float],
     texture: List[pg.Surface],
     x0: float,
     y0: float,
