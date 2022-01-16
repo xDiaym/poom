@@ -35,9 +35,7 @@ class SingletonManager(pygame_gui.UIManager):
 
     def __call__(cls, size, style_dir):
         if cls not in cls._instances:
-            cls._instances[cls] = super(SingletonManager, cls).__call__(
-                size, style_dir
-            )
+            cls._instances[cls] = super(SingletonManager, cls).__call__(size, style_dir)
         return cls._instances[cls]
 
 
@@ -205,9 +203,7 @@ class WelcomeScene(AbstractScene):
             if event.ui_element == self.settings:
                 self._context.scene = SettingsScene(self._context, self.zombie)
             if event.ui_element == self.statistics:
-                self._context.scene = StatiscticsScene(
-                    self._context, self.zombie
-                )
+                self._context.scene = StatiscticsScene(self._context, self.zombie)
             if event.ui_element == self.quit:
                 print("quit")
 
@@ -291,9 +287,7 @@ class SettingsScene(AbstractScene):
 
     def on_click(self, event) -> None:
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
-            self.current_volume.set_text(
-                f"{int(self.volume.current_value * 100)} %"
-            )
+            self.current_volume.set_text(f"{int(self.volume.current_value * 100)} %")
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.back:
                 manager.clear_and_reset()

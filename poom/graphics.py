@@ -76,7 +76,10 @@ class WallRenderer(AbstractRenderer):
         self._textures = [pg.image.load(path1), pg.image.load(path2)]
 
     def __call__(
-        self, surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer,
+        self,
+        surface: pg.Surface,
+        stencil: StencilBuffer,
+        viewer: Viewer,
     ) -> None:
         draw_walls(
             self._map,
@@ -98,10 +101,7 @@ class EntityRenderer(AbstractRenderer):
 
     @staticmethod
     def _render_single(
-        surface: pg.Surface,
-        stencil: StencilBuffer,
-        viewer: Viewer,
-        entity: Entity
+        surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer, entity: Entity
     ) -> None:
         draw_sprite(
             surface,
@@ -114,7 +114,10 @@ class EntityRenderer(AbstractRenderer):
         )
 
     def __call__(
-        self, surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer,
+        self,
+        surface: pg.Surface,
+        stencil: StencilBuffer,
+        viewer: Viewer,
     ) -> None:
         """Render entity in entities list.
 
@@ -122,7 +125,16 @@ class EntityRenderer(AbstractRenderer):
         :param stencil: stencil buffer
         :param viewer: camera-like object
         """
-        for entity in self._entities:
+
+        # Due to the fact that 1D depth buffer is used,
+        # the attributes must be drawn in decreasing order of distance.
+        entities = sorted(
+            self._entities,
+            # Avoid sqrt calculation
+            key=lambda x: (x.position - viewer.position).magnitude_squared(),
+            reverse=True,
+        )
+        for entity in entities:
             self._render_single(surface, stencil, viewer, entity)
 
 

@@ -14,7 +14,6 @@ def draw_walls(
     view: float,
     fov: float,
 ) -> None: ...
-
 def draw_sprite(
     surface: pg.Surface,
     stencil: NDArray[np.float32],

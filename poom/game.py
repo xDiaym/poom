@@ -26,16 +26,22 @@ def game_loop() -> None:
     clock = pg.time.Clock()
     dt: float = 0
 
-    soldier = Enemy(
+    soldier1 = Enemy(
         position=pg.Vector2(5, 5),
         angle=radians(45),
         fov=radians(90),
-        texture=pg.image.load("assets/soldier.png")
+        texture=pg.image.load("assets/soldier.png"),
+    )
+    soldier2 = Enemy(
+        position=pg.Vector2(5.25, 4),
+        angle=radians(45),
+        fov=radians(90),
+        texture=pg.image.load("assets/soldier.png"),
     )
     renderers = [
         WallRenderer(map_, player),
+        EntityRenderer([soldier1, soldier2]),
         FPSRenderer(clock),
-        EntityRenderer([soldier])
     ]
     pipeline = Pipeline(player, renderers)
 

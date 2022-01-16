@@ -138,15 +138,19 @@ def draw_sprite(
     scaled_texture = pg.transform.scale(texture, (sprite_width, sprite_height))
     cdef:
         int texture_offset = 0
+        int position = 0
     for texture_offset in range(<int>sprite_width):
-        if offset + texture_offset < 0 or offset + texture_offset >= surface_width:
+        position = offset + texture_offset
+        if position < 0 or position >= surface_width:
             # Part of sprite not in camera frustum, avoid scale and blit
             continue
-        if stencil[offset + texture_offset] < distance:
+        if stencil[position] < distance:
             # Sprite behind something
             continue
+
         line = scaled_texture.subsurface((texture_offset, 0, 1, sprite_height))
         surface.blit(
             line,
-            (<int> offset + texture_offset, (surface_height - <int> sprite_height) // 2)
+            (<int> position, (surface_height - <int> sprite_height) // 2)
         )
+        stencil[position] = distance
