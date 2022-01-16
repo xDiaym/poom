@@ -7,9 +7,9 @@ import numpy as np
 import pygame as pg
 
 cimport numpy as np
-from libc.math cimport cos, sin, sqrt, tan
+from libc.math cimport atan2, cos, sin, sqrt, tan
 
-from poom.pooma.math cimport Vec2f, Vec2i, frac, sign
+from poom.pooma.math cimport Vec2f, Vec2i, angle_diff, frac, magnitude, sign, sub
 
 
 cdef struct Intersection:
@@ -100,3 +100,33 @@ def draw_walls(
         line = texture.subsurface(offset, 0, 1, texture_height)
         wall = pg.transform.scale(line, (1, 2 * half_height))
         surface.blit(wall, (x, height // 2 - half_height))
+
+
+@cython.cdivision(True)
+def draw_sprite(
+    surface: pg.Surface,
+    np.ndarray[np.float32_t, ndim=1] stencil,
+    texture: pg.Surface,
+    float sprite_x,
+    float sprite_y,
+    float viewer_x,
+    float viewer_y,
+    float angle,
+    float fov
+):
+    cdef:
+        int width = surface.get_width(), height = surface.get_height()
+        Vec2f v = sub(Vec2f(sprite_x, sprite_y), Vec2f(viewer_x, viewer_y))
+        float enemy_angle = atan2(v.y, v.x)
+        float a = angle_diff(enemy_angle, angle)
+        float offset, ratio
+        int w
+
+    size = (height / magnitude(v))
+    ratio = size / texture.get_height()
+    w = ratio * texture.get_width()
+
+    t = pg.transform.scale(texture, (w, size))
+    offset = width / 2 + a * width / fov - size / 2
+    # if offset not in range - skip
+    surface.blit(t, (<int>offset, (height - size) // 2))

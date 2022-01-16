@@ -3,6 +3,7 @@
 
 cdef float frac(float x)
 cdef int sign(float x)
+cdef float angle_diff(float alpha, float beta)
 
 cdef struct Vec2i:
     int x
