@@ -7,6 +7,7 @@ import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 
+from poom.entities.entity import Entity
 from poom.map_loader import Map
 from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint:disable=E0611
 from poom.viewer import Viewer
@@ -91,8 +92,26 @@ class WallRenderer(AbstractRenderer):
 class EntityRenderer(AbstractRenderer):
     """Render any entities."""
 
-    def __init__(self) -> None:
-        self._texture = pg.image.load("./assets/soldier.png")
+    # TODO: create entity group for deletion from rendering
+    def __init__(self, entities: Collection[Entity]) -> None:
+        self._entities = entities
+
+    @staticmethod
+    def _render_single(
+        surface: pg.Surface,
+        stencil: StencilBuffer,
+        viewer: Viewer,
+        entity: Entity
+    ) -> None:
+        draw_sprite(
+            surface,
+            stencil,
+            entity.texture,
+            *entity.position,
+            *viewer.position,
+            viewer.angle,
+            viewer.fov,
+        )
 
     def __call__(
         self, surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer,
@@ -103,16 +122,8 @@ class EntityRenderer(AbstractRenderer):
         :param stencil: stencil buffer
         :param viewer: camera-like object
         """
-        draw_sprite(
-            surface,
-            stencil,
-            self._texture,
-            5,
-            5,
-            *viewer.position,
-            viewer.angle,
-            viewer.fov,
-        )
+        for entity in self._entities:
+            self._render_single(surface, stencil, viewer, entity)
 
 
 class Pipeline:

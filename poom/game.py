@@ -5,6 +5,7 @@ from typing import List
 
 import pygame as pg
 
+from poom.entities.enemy import Enemy
 from poom.graphics import EntityRenderer, FPSRenderer, Pipeline, WallRenderer
 from poom.map_loader import MapLoader
 from poom.viewer import Viewer
@@ -24,10 +25,19 @@ def game_loop() -> None:
     map_ = map_loader.as_numpy(1)
     clock = pg.time.Clock()
     dt: float = 0
-    pipeline = Pipeline(
-        player,
-        [WallRenderer(map_, player), FPSRenderer(clock), EntityRenderer()],
+
+    soldier = Enemy(
+        position=pg.Vector2(5, 5),
+        angle=radians(45),
+        fov=radians(90),
+        texture=pg.image.load("assets/soldier.png")
     )
+    renderers = [
+        WallRenderer(map_, player),
+        FPSRenderer(clock),
+        EntityRenderer([soldier])
+    ]
+    pipeline = Pipeline(player, renderers)
 
     run = True
     while run:
