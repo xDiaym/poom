@@ -114,18 +114,39 @@ def draw_sprite(
     float fov
 ):
     cdef:
-        int width = surface.get_width(), height = surface.get_height()
+        int surface_width = surface.get_width()
+        int surface_height = surface.get_height()
+
+    cdef:
         Vec2f v = sub(Vec2f(sprite_x, sprite_y), Vec2f(viewer_x, viewer_y))
+        float distance = magnitude(v)
         float enemy_angle = atan2(v.y, v.x)
-        float a = angle_diff(enemy_angle, angle)
-        float offset, ratio, size
-        int w
+        float delta_a = angle_diff(enemy_angle, angle)
 
-    size = (height / magnitude(v))
-    ratio = size / texture.get_height()
-    w = ratio * texture.get_width()
+    cdef:
+        float ratio = texture.get_width() / texture.get_height()
+        int sprite_height = <int>(surface_height / magnitude(v))
+        int sprite_width = <int>(sprite_height * ratio)
+        int offset = <int>(
+            surface_width / 2 + delta_a * surface_width / fov - sprite_width / 2
+        )
 
-    t = pg.transform.scale(texture, (w, size))
-    offset = width / 2 + a * width / fov - size / 2
-    # if offset not in range - skip
-    surface.blit(t, (<int>offset, (height - size) // 2))
+    if offset + sprite_width < 0 or offset >= surface_width:
+        # *ALL* sprite not in camera frustum, avoid scale and blit
+        return
+
+    scaled_texture = pg.transform.scale(texture, (sprite_width, sprite_height))
+    cdef:
+        int texture_offset = 0
+    for texture_offset in range(<int>sprite_width):
+        if offset + texture_offset < 0 or offset + texture_offset >= surface_width:
+            # Part of sprite not in camera frustum, avoid scale and blit
+            continue
+        if stencil[offset + texture_offset] < distance:
+            # Sprite behind something
+            continue
+        line = scaled_texture.subsurface((texture_offset, 0, 1, sprite_height))
+        surface.blit(
+            line,
+            (<int> offset + texture_offset, (surface_height - <int> sprite_height) // 2)
+        )

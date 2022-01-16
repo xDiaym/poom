@@ -1,14 +1,14 @@
 """All utils for graphics pipeline."""
 import os
 from abc import ABC, abstractmethod
-from typing import Collection, Final, Optional
+from typing import Any, Collection, Final, Optional
 
 import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 
 from poom.map_loader import Map
-from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint: disable=E0611
+from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint:disable=E0611
 from poom.viewer import Viewer
 
 StencilBuffer = NDArray[np.float32]
@@ -49,12 +49,7 @@ class FPSRenderer(AbstractRenderer):
         self._font = pg.font.Font(font_name, font_size)
         self._position = position or pg.Vector2(0, 0)
 
-    def __call__(
-        self,
-        surface: pg.Surface,
-        _sb: StencilBuffer,
-        _v: Viewer,
-    ) -> None:
+    def __call__(self, surface: pg.Surface, *args: Any, **kwargs: Any) -> None:
         fps = self._clock.get_fps()
         color = "red"
         if fps >= self.YELLOW_LIMIT:
@@ -80,7 +75,7 @@ class WallRenderer(AbstractRenderer):
         self._textures = [pg.image.load(path1), pg.image.load(path2)]
 
     def __call__(
-        self, surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer
+        self, surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer,
     ) -> None:
         draw_walls(
             self._map,
@@ -100,12 +95,13 @@ class EntityRenderer(AbstractRenderer):
         self._texture = pg.image.load("./assets/soldier.png")
 
     def __call__(
-        self, surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer
+        self, surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer,
     ) -> None:
         """Render entity in entities list.
 
         :param surface: surface for rendering
         :param stencil: stencil buffer
+        :param viewer: camera-like object
         """
         draw_sprite(
             surface,
@@ -135,7 +131,6 @@ class Pipeline:
 
         :param surface: surface for rendering
         """
-
         stencil = np.full(surface.get_width(), np.inf, dtype=np.float32)
 
         surface.fill("black")

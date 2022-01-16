@@ -16,4 +16,4 @@ build/
 .pytest_cache/
 .coverage
 coverage.xml
-/poom/**.html
+**.html

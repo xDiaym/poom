@@ -25,7 +25,8 @@ def game_loop() -> None:
     clock = pg.time.Clock()
     dt: float = 0
     pipeline = Pipeline(
-        player, [WallRenderer(map_, player), FPSRenderer(clock), EntityRenderer()]
+        player,
+        [WallRenderer(map_, player), FPSRenderer(clock), EntityRenderer()],
     )
 
     run = True
