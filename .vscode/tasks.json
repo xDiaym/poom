@@ -7,7 +7,23 @@
             "label": "build pooma",
             "type": "shell",
             "command": "python",
-            "args": ["${workspaceFolder}/setup.py", "build_ext", "--inplace"]
+            "args": [
+                "${workspaceFolder}/setup.py",
+                "build_ext",
+                "--inplace"
+            ],
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "build Cython annotations",
+            "type": "process",
+            "command": "cython",
+            "args": [
+                "-a",
+                "${workspaceFolder}/pooma/*.pyx",
+            ],
+            "group": "build"
         }
     ]
 }

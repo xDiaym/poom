@@ -1,5 +1,4 @@
 #cython: language_level=3
-import typing
 from typing import List
 
 import cython
@@ -119,7 +118,7 @@ def draw_sprite(
         Vec2f v = sub(Vec2f(sprite_x, sprite_y), Vec2f(viewer_x, viewer_y))
         float enemy_angle = atan2(v.y, v.x)
         float a = angle_diff(enemy_angle, angle)
-        float offset, ratio
+        float offset, ratio, size
         int w
 
     size = (height / magnitude(v))
