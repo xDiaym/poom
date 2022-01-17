@@ -1,0 +1,29 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build pooma",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}/setup.py",
+                "build_ext",
+                "--inplace"
+            ],
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "build Cython annotations",
+            "type": "process",
+            "command": "cython",
+            "args": [
+                "-a",
+                "${workspaceFolder}/pooma/*.pyx",
+            ],
+            "group": "build"
+        }
+    ]
+}

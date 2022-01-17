@@ -64,7 +64,10 @@ class Animation:
             images.append(
                 pg.transform.scale(
                     source,
-                    (int(source.get_width() * scale), int(source.get_height() * scale)),
+                    (
+                        int(source.get_width() * scale),
+                        int(source.get_height() * scale),
+                    ),
                 )
             )
         return cls(images, speed)

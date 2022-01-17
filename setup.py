@@ -1,5 +1,6 @@
 import numpy
 from setuptools import setup
+from setuptools.extension import Extension
 
 from Cython.Build import cythonize  # isort: skip strange build system bug
 
@@ -9,9 +10,18 @@ def read(filename: str) -> str:
         return fp.read()
 
 
+extensions = [
+    Extension(
+        name="poom.pooma.ray_march",
+        sources=["poom/pooma/ray_march.pyx"],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
+    ),
+    Extension(name="poom.pooma.math", sources=["poom/pooma/math.pyx"]),
+]
+
 setup(
     name="poom",
     description=read("README.md"),
-    ext_modules=cythonize("poom/ray_march.pyx", language_level="3"),
+    ext_modules=cythonize(extensions, language_level=3),
     include_dirs=numpy.get_include(),
 )

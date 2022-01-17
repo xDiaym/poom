@@ -1,4 +1,15 @@
 [flake8]
 max-line-length = 80
 exclude = .git/, __pycache__/, venv/
-max-complexity = 10
+max-complexity = 16
+format = wemake
+show-source = true
+docstring-style = sphinx
+ignore =
+    # black uses double quotes
+    Q000,
+    # class without parents is ok
+    WPS306,
+    # class constants is ok
+    WPS115
+rst-roles = attr,class,func,meth,mod,obj,ref,term
