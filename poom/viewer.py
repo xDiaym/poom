@@ -17,7 +17,11 @@ class Viewer:
         self._angle = angle
         self._fov = fov
 
-    position = property(lambda self: self._position)
+    # flake8 can't infer type from expression, like 'position = property(...)'
+    @property
+    def position(self) -> Vector2:
+        return self._position
+
     angle = property(lambda self: self._angle)
     fov = property(lambda self: self._fov)
 

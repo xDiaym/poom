@@ -6,7 +6,13 @@ from typing import List
 import pygame as pg
 
 from poom.entities.enemy import Enemy
-from poom.graphics import EntityRenderer, FPSRenderer, Pipeline, WallRenderer
+from poom.graphics import (
+    BackgroundRenderer,
+    EntityRenderer,
+    FPSRenderer,
+    Pipeline,
+    WallRenderer,
+)
 from poom.map_loader import MapLoader
 from poom.viewer import Viewer
 
@@ -39,6 +45,7 @@ def game_loop() -> None:
         texture=pg.image.load("assets/soldier.png"),
     )
     renderers = [
+        BackgroundRenderer(pg.image.load("assets/skybox.png"), map_.shape[0]),
         WallRenderer(map_, player),
         EntityRenderer([soldier1, soldier2]),
         FPSRenderer(clock),

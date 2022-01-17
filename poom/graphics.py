@@ -1,6 +1,7 @@
 """All utils for graphics pipeline."""
 import os
 from abc import ABC, abstractmethod
+from math import degrees
 from typing import Any, Collection, Final, Optional
 
 import numpy as np
@@ -33,6 +34,62 @@ class AbstractRenderer(ABC):
         """
 
 
+class BackgroundRenderer(AbstractRenderer):
+    """Render sky and floor."""
+
+    def __init__(self, skybox: pg.Surface, world_size: int) -> None:
+        """Initialize object.
+
+        :attr:`~BackgroundRenderer._world_size` is a width(or height) of map.
+        It used as rotation coefficient.
+
+        :param skybox: sky image
+        :param world_size: size of world
+        """
+        self._skybox = skybox
+        self._world_size = world_size
+        self._floor_color = (40, 40, 40)
+
+    def __call__(
+        self,
+        surface: pg.Surface,
+        _: StencilBuffer,
+        viewer: Viewer,
+    ) -> None:
+        """Draw background: floor and skybox.
+
+        :param surface: surface for rendering
+        :param _: unused
+        :param viewer: camera-like object
+        """
+        self._render_skybox(surface, viewer)
+        self._redener_floor(surface)
+
+    def _render_skybox(self, surface: pg.Surface, viewer: Viewer) -> None:
+        """Render skybox.
+
+        Calculate offset using :attr:`~BackgroundRenderer._world_size`.
+
+        :param surface: rendering surface(canvas)
+        :param viewer: camera-like object
+        """
+        width, height = surface.get_size()
+        offset = -self._world_size * degrees(viewer.angle) % width
+        for third in range(-1, 2):
+            skybox_position = (offset + third * width, 0)
+            surface.blit(self._skybox, skybox_position)
+
+    def _redener_floor(self, surface: pg.Surface) -> None:
+        """Render floor.
+
+        :param surface: rendering surface(canvas)
+        """
+        width, height = surface.get_size()
+
+        floor_position = (0, height // 2, width, height // 2)
+        surface.fill(self._floor_color, floor_position)
+
+
 class FPSRenderer(AbstractRenderer):
     """Displays colorized fps counter."""
 
@@ -44,7 +101,7 @@ class FPSRenderer(AbstractRenderer):
         clock: pg.time.Clock,
         font_name: Optional[str] = None,
         font_size: int = 32,
-        position: pg.Vector2 = None,
+        position: Optional[pg.Vector2] = None,
     ) -> None:
         self._clock = clock
         self._font = pg.font.Font(font_name, font_size)
@@ -79,7 +136,7 @@ class WallRenderer(AbstractRenderer):
         self,
         surface: pg.Surface,
         stencil: StencilBuffer,
-        viewer: Viewer,
+        viewer: Viewer,  # FIXME: self._viewer is useless now
     ) -> None:
         draw_walls(
             self._map,
@@ -92,26 +149,29 @@ class WallRenderer(AbstractRenderer):
         )
 
 
+def _render_single(
+    surface: pg.Surface,
+    stencil: StencilBuffer,
+    viewer: Viewer,
+    entity: Entity,
+) -> None:
+    draw_sprite(
+        surface,
+        stencil,
+        entity.texture,
+        *entity.position,
+        *viewer.position,
+        viewer.angle,
+        viewer.fov,
+    )
+
+
 class EntityRenderer(AbstractRenderer):
     """Render any entities."""
 
     # TODO: create entity group for deletion from rendering
     def __init__(self, entities: Collection[Entity]) -> None:
         self._entities = entities
-
-    @staticmethod
-    def _render_single(
-        surface: pg.Surface, stencil: StencilBuffer, viewer: Viewer, entity: Entity
-    ) -> None:
-        draw_sprite(
-            surface,
-            stencil,
-            entity.texture,
-            *entity.position,
-            *viewer.position,
-            viewer.angle,
-            viewer.fov,
-        )
 
     def __call__(
         self,
@@ -125,17 +185,18 @@ class EntityRenderer(AbstractRenderer):
         :param stencil: stencil buffer
         :param viewer: camera-like object
         """
-
-        # Due to the fact that 1D depth buffer is used,
-        # the attributes must be drawn in decreasing order of distance.
+        start = viewer.position
         entities = sorted(
             self._entities,
             # Avoid sqrt calculation
-            key=lambda x: (x.position - viewer.position).magnitude_squared(),
+            key=lambda entity: (entity.position - start).magnitude_squared(),
             reverse=True,
         )
-        for entity in entities:
-            self._render_single(surface, stencil, viewer, entity)
+
+        # Due to the fact that 1D depth buffer is used,
+        # the attributes must be drawn in decreasing order of distance.
+        for entity in entities:  # noqa: WPS440 no overlap
+            _render_single(surface, stencil, viewer, entity)
 
 
 class Pipeline:
