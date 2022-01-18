@@ -1,7 +1,7 @@
 import json
 from os import getcwd, listdir
-from shared import SceneContext, ScreenResizer, AbstractScene
 from pathlib import Path
+
 import pygame as pg
 import pygame_gui
 from pygame_gui.core import ObjectID
@@ -12,7 +12,7 @@ from pygame_gui.elements import (
     UILabel,
     UITextBox,
 )
-
+from shared import AbstractScene, SceneContext, ScreenResizer
 
 # "#2f353b"
 pg.init()
@@ -218,7 +218,10 @@ class SettingsScene(AbstractScene):
         )
         self.current_volume = UILabel(
             pg.Rect(
-                (screen.width - 200) // 2 + 260, screen.height * 0.58 + 32, 100, 50
+                (screen.width - 200) // 2 + 260,
+                screen.height * 0.58 + 32,
+                100,
+                50,
             ),
             f"{settings['volume']} %",
             screen.manager,

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
+
 import pygame as pg
 import pygame_gui
-from pathlib import Path
 
 
 class ScreenResizer:
@@ -12,7 +13,8 @@ class ScreenResizer:
         self.size = self.width, self.height = width, height
         self.surface = pg.display.set_mode(self.size)
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "back.png").convert_alpha(), (width, height)
+            pg.image.load(root / "assets" / "back.png").convert_alpha(),
+            (width, height),
         )
         self.manager = pygame_gui.UIManager(self.size, root / "assets" / "style.json")
 

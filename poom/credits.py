@@ -1,6 +1,7 @@
 from os import getcwd, listdir
 from pathlib import Path
 from typing import List, Union
+
 import pygame as pg
 
 root = Path(getcwd())
@@ -24,7 +25,11 @@ class Text:
         self.data = []
 
     def add(
-        self, text: Union[str, List[str]], font_size: int, start_x: int, start_y: int
+        self,
+        text: Union[str, List[str]],
+        font_size: int,
+        start_x: int,
+        start_y: int,
     ) -> None:
         self.data.append((text, font_size, start_x, start_y))
 
