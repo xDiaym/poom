@@ -8,6 +8,7 @@ import pygame as pg
 from poom.entities.enemy import Enemy
 from poom.graphics import (
     BackgroundRenderer,
+    CrosshairRenderer,
     EntityRenderer,
     FPSRenderer,
     Pipeline,
@@ -48,6 +49,7 @@ def game_loop() -> None:
         BackgroundRenderer(pg.image.load("assets/skybox.png"), map_.shape[0]),
         WallRenderer(map_, player),
         EntityRenderer([soldier1, soldier2]),
+        CrosshairRenderer(),
         FPSRenderer(clock),
     ]
     pipeline = Pipeline(player, renderers)

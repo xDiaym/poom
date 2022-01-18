@@ -2,7 +2,7 @@
 import os
 from abc import ABC, abstractmethod
 from math import degrees
-from typing import Any, Collection, Final, Optional
+from typing import Any, Collection, Final, Optional, Tuple, Union
 
 import numpy as np
 import pygame as pg
@@ -120,10 +120,71 @@ class FPSRenderer(AbstractRenderer):
         surface.blit(fps_image, self._position)
 
 
+ColorLike = Union[pg.Color, Tuple[int, int, int]]
+
+
+class CrosshairRenderer(AbstractRenderer):
+    """Render crosshair. Does not update the stencil buffer."""
+
+    def __init__(
+        self,
+        color: ColorLike = (0, 255, 255),
+        *,
+        size: int = 7,
+        width: int = 2,
+    ) -> None:
+        """Initialize renderer.
+
+        :param color: crosshair color, defaults to (0, 255, 255)
+        :param size: croshair width and height in pixels, defaults to 7
+        :param width: line width, defaults to 2
+        """
+        self._color = color
+        self._size = size
+        self._width = width
+
+    def __call__(
+        self,
+        surface: pg.Surface,
+        _stencil: StencilBuffer,
+        _viewer: Viewer,
+    ) -> None:
+        """Render crosshair on screen.
+
+        Doesn't modify stencil buffer.
+
+        :param surface: surface for rendering(canves)
+        :param _stencil: unused
+        :param _viewer: unused
+        """
+        width, height = surface.get_size()
+        pg.draw.line(
+            surface,
+            self._color,
+            (width // 2, height // 2 - self._size),
+            (width // 2, height // 2 + self._size),
+            self._width,
+        )
+        pg.draw.line(
+            surface,
+            self._color,
+            (width // 2 - self._size, height // 2),
+            (width // 2 + self._size, height // 2),
+            self._width,
+        )
+
+
 class WallRenderer(AbstractRenderer):
     """Render walls using ray marching(DDA) algorithm."""
 
     def __init__(self, map_: Map, viewer: Viewer) -> None:
+        """[summary]
+
+        :param map_: [description]
+        :type map_: Map
+        :param viewer: [description]
+        :type viewer: Viewer
+        """
         self._map = map_
         self._viewer = viewer  # ??? maybe use RenderContext?
 
