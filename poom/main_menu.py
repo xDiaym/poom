@@ -26,7 +26,7 @@ running = True
 clock = pg.time.Clock()
 
 
-def clamp(low, high, value):
+def clamp(low: int, high: int, value: float):
     return max(min(high, value), low)
 
 
@@ -36,7 +36,7 @@ class Animation:
         self._speed = speed
         self._animation_rate = 0
 
-    def update(self, dt) -> None:
+    def update(self, dt: float) -> None:
         self._animation_rate += dt * self._speed
 
     def flip_images(self) -> None:
@@ -73,7 +73,17 @@ class Animation:
         return cls(images, speed)
 
 
-class Zombie(pg.sprite.Sprite):
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+class Zombie(pg.sprite.Sprite, metaclass=Singleton):
     def __init__(self) -> None:
         self.group = pg.sprite.GroupSingle()
         super().__init__(self.group)
@@ -92,7 +102,7 @@ class Zombie(pg.sprite.Sprite):
         self.rotate = False
         self.left = True
 
-    def update(self, dt) -> None:
+    def update(self, dt: float) -> None:
         if not 0 < self.x <= screen.width - self.image.get_width() and not self.rotate:
             self.rotate = True
             self.rotation_animation.reset()
@@ -115,9 +125,9 @@ class Zombie(pg.sprite.Sprite):
 
 
 class WelcomeScene(AbstractScene):
-    def __init__(self, context, zombie=Zombie()) -> None:
+    def __init__(self, context: SceneContext) -> None:
         super().__init__(context)
-        self.zombie = zombie
+        self.zombie = Zombie()
         self.poom_label = UILabel(
             pg.Rect((screen.width - 220) // 2, screen.height * 0.05, 220, 110),
             "Poom",
@@ -151,9 +161,9 @@ class WelcomeScene(AbstractScene):
             if event.ui_element == self.play:
                 print("play")
             if event.ui_element == self.settings:
-                self._context.scene = SettingsScene(self._context, self.zombie)
+                self._context.scene = SettingsScene(self._context)
             if event.ui_element == self.statistics:
-                self._context.scene = StatiscticsScene(self._context, self.zombie)
+                self._context.scene = StatiscticsScene(self._context)
             if event.ui_element == self.quit:
                 print("quit")
 
@@ -167,9 +177,9 @@ class WelcomeScene(AbstractScene):
 
 
 class SettingsScene(AbstractScene):
-    def __init__(self, context, zombie: Zombie) -> None:
+    def __init__(self, context: SceneContext) -> None:
         super().__init__(context)
-        self.zombie = zombie
+        self.zombie = Zombie()
         self.settings_label = UILabel(
             pg.Rect((screen.width - 230) // 2, screen.height * 0.05, 230, 80),
             "Settings",
@@ -247,7 +257,7 @@ class SettingsScene(AbstractScene):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.back:
                 screen.manager.clear_and_reset()
-                self._context.scene = WelcomeScene(self._context, self.zombie)
+                self._context.scene = WelcomeScene(self._context)
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.graphics:
                 settings["quality"] = self.graphics.selected_option
@@ -260,7 +270,7 @@ class SettingsScene(AbstractScene):
                 self.zombie.rect.y = height - self.zombie.image.get_height()
                 settings["screen_size"] = [width, height]
                 settings["ratio"] = ratio[1:-1]
-                self._context.scene = SettingsScene(self._context, self.zombie)
+                self._context.scene = SettingsScene(self._context)
             if event.ui_element == self.fps:
                 settings["fps_tick"] = (
                     True if self.fps.selected_option == "on" else False
@@ -278,9 +288,9 @@ class SettingsScene(AbstractScene):
 
 
 class StatiscticsScene(AbstractScene):
-    def __init__(self, context, zombie: Zombie) -> None:
+    def __init__(self, context: SceneContext) -> None:
         super().__init__(context)
-        self.zombie = zombie
+        self.zombie = Zombie()
         self.stats_label = UILabel(
             pg.Rect((screen.width - 230) // 2, screen.height * 0.05, 230, 80),
             "Statistics",
@@ -306,7 +316,7 @@ class StatiscticsScene(AbstractScene):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.back:
                 screen.manager.clear_and_reset()
-                self._context.scene = WelcomeScene(self._context, self.zombie)
+                self._context.scene = WelcomeScene(self._context)
 
     def render(self, surface: pg.Surface) -> None:
         self.zombie.group.draw(surface)
