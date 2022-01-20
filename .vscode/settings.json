@@ -8,6 +8,7 @@
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "conventionalCommits.scopes": [
-        "graphics"
+        "graphics",
+        "game"
     ]
 }

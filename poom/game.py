@@ -27,9 +27,9 @@ def game_loop() -> None:
 
     screen = pg.display.set_mode(SCREEN_SIZE, vsync=1)
 
-    player = Player(position=pg.Vector2(1.1, 1.1), angle=radians(45), fov=radians(90))
     map_loader = MapLoader(root / "assets" / "levels")
     map_ = map_loader.as_numpy(1)
+    player = Player(map_=map_, position=pg.Vector2(1.1, 1.1), angle=radians(45), fov=radians(90))
     clock = pg.time.Clock()
     dt: float = 0
 
