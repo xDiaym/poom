@@ -6,7 +6,7 @@ from typing import List
 import pygame as pg
 
 from poom.entities.enemy import Enemy
-from poom.entities.player import Player
+from poom.player import Player
 from poom.graphics import (
     BackgroundRenderer,
     CrosshairRenderer,
@@ -57,10 +57,11 @@ def game_loop() -> None:
     run = True
     while run:
         # TODO: event handler
-        for event in pg.event.get():
+        events = pg.event.get()
+        for event in events:
             if event.type == pg.QUIT:
                 run = False
-        player.update(dt)
+        player.update(dt, events)
         pipeline.render(screen)
         dt = clock.tick() / 1000
     pg.quit()
