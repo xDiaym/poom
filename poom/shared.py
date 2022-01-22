@@ -48,7 +48,6 @@ class Animation:
             )
         return cls(images, speed)
 
-
 class ScreenResizer:
     def __init__(self, width: int, height: int, root: Path) -> None:
         self.resize(width, height, root)
@@ -57,7 +56,8 @@ class ScreenResizer:
         self.size = self.width, self.height = width, height
         self.surface = pg.display.set_mode(self.size)
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "back.png").convert_alpha(), (width, height)
+            pg.image.load(root / "assets" / "back.png").convert_alpha(),
+            (width, height),
         )
         self.manager = pygame_gui.UIManager(self.size, root / "assets" / "style.json")
 

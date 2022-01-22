@@ -1,5 +1,5 @@
 import json
-from os import getcwd
+from os import getcwd, listdir
 from pathlib import Path
 
 import pygame as pg
@@ -185,7 +185,10 @@ class SettingsScene(AbstractScene):
         )
         self.current_volume = UILabel(
             pg.Rect(
-                (screen.width - 200) // 2 + 260, screen.height * 0.58 + 32, 100, 50
+                (screen.width - 200) // 2 + 260,
+                screen.height * 0.58 + 32,
+                100,
+                50,
             ),
             f"{settings['volume']} %",
             screen.manager,
