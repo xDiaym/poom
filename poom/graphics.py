@@ -8,7 +8,8 @@ import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 
-from poom.entities.entity import Entity
+from poom.entities import Entity
+from poom.gun import AnimatedGun
 from poom.map_loader import Map
 from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint:disable=E0611
 from poom.viewer import Viewer
@@ -282,3 +283,22 @@ class Pipeline:
         for renderer in self._renderers:
             renderer(surface, stencil, self._viewer)
         pg.display.flip()
+
+
+class GunRenderer(AbstractRenderer):
+    def __init__(self, gun: AnimatedGun) -> None:
+        self._gun = gun
+
+    def __call__(
+        self,
+        surface: pg.Surface,
+        _stencil: StencilBuffer,
+        _viewer: Viewer
+    ) -> None:
+        texture = self._gun.texture
+        s_width, s_height = surface.get_size()
+        t_width, t_height = texture.get_size()
+        surface.blit(
+            texture,
+            ((s_width - t_width) // 2, s_height - t_height)
+        )

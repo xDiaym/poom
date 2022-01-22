@@ -13,3 +13,4 @@ ignore =
     # class constants is ok
     WPS115
 rst-roles = attr,class,func,meth,mod,obj,ref,term
+rst-directives = math

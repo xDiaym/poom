@@ -14,6 +14,8 @@ from pygame_gui.elements import (
 )
 from shared import AbstractScene, SceneContext, ScreenResizer
 
+from poom.animated import Animation
+
 # "#2f353b"
 pg.init()
 root = Path(getcwd())
@@ -28,49 +30,6 @@ clock = pg.time.Clock()
 
 def clamp(low, high, value):
     return max(min(high, value), low)
-
-
-class Animation:
-    def __init__(self, images: list, speed: float) -> None:
-        self._images = images
-        self._speed = speed
-        self._animation_rate = 0
-
-    def update(self, dt) -> None:
-        self._animation_rate += dt * self._speed
-
-    def flip_images(self) -> None:
-        for i in range(len(self._images)):
-            self._images[i] = pg.transform.flip(self._images[i], True, False)
-
-    def reset(self) -> None:
-        self._animation_rate = 0
-
-    @property
-    def done(self) -> float:
-        return self._animation_rate > len(self._images)
-
-    @property
-    def current_frame(self) -> pg.Surface:
-        return self._images[int(self._animation_rate) % len(self._images)]
-
-    @classmethod
-    def from_dir(cls, root: Path, speed: float, scale: float = 1):
-        filenames = sorted(listdir(root), key=lambda x: int(Path(x).stem))
-        images = []
-        for name in filenames:
-            path = root / name
-            source = pg.image.load(path).convert_alpha()
-            images.append(
-                pg.transform.scale(
-                    source,
-                    (
-                        int(source.get_width() * scale),
-                        int(source.get_height() * scale),
-                    ),
-                )
-            )
-        return cls(images, speed)
 
 
 class Zombie(pg.sprite.Sprite):

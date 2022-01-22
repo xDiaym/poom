@@ -1,17 +1,17 @@
 """Describes player."""
-from typing import Final, List, Sequence
+from typing import Final, List, Sequence, Collection
 
 import numpy as np
 import pygame as pg
-from pygame.event import Event
 from numpy.typing import NDArray
+from pygame.event import Event
 from pygame.math import Vector2
 
-from poom.entities.damagable import Damagable
-from poom.viewer import Viewer
+from poom.entities import Pawn
+from poom.gun import Gun, AnimatedGun
 
 
-class Player(Damagable, Viewer):
+class Player(Pawn):
     """Player."""
 
     max_health: Final[float] = 100
@@ -22,22 +22,31 @@ class Player(Damagable, Viewer):
         self,
         *,
         map_: NDArray[np.float32],
+        gun: AnimatedGun,
         position: Vector2,
         angle: float,
         fov: float,
+        enemies: Collection[Pawn],
     ) -> None:
         super().__init__(position, angle, fov)
+        self._gun = gun
         self._map = map_
         self._health = self.max_health
+        self._enemies = enemies
 
-    def update(self, dt: float, event: List[Event]) -> None:
+    @property
+    def hitbox_width(self) -> float:
+        return 0.5
+
+    def update(self, dt: float) -> None:
         """Update player state.
 
         :param dt: delta time
         """
         self._process_keys(dt)
+        self._gun.update(dt)
 
-    def take_damge(self, damage: float) -> None:
+    def take_damage(self, damage: float) -> None:
         """Decrease health.
 
         :param damage: damage by which health is reduced
@@ -81,8 +90,8 @@ class Player(Damagable, Viewer):
         keys = pg.key.get_pressed()
         self._move(dt, keys)
         self._rotate(dt, keys)
-        if keys[pg.K_SPACE]:
-            self._shoot()
+        self._shoot(keys)
 
-    def _shoot(self) -> None:
-        print("SHOOT!")
+    def _shoot(self, keys: Sequence[bool]) -> None:
+        if keys[pg.K_SPACE]:
+            self._gun.shoot(self._position, self._angle, self._enemies)

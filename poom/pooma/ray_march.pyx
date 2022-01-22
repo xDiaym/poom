@@ -65,7 +65,7 @@ def shoot(
     float angle,
     float max_distance = 100.0,
 ) -> float:
-    cdef Intersection intersection = cast_ray(map_, Vec2f(x0, 0), angle, max_distance)
+    cdef Intersection intersection = cast_ray(map_, Vec2f(x0, y0), angle, max_distance)
     return intersection.distance
 
 

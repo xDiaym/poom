@@ -5,17 +5,19 @@ from typing import List
 
 import pygame as pg
 
-from poom.entities.enemy import Enemy
-from poom.player import Player
+from poom.animated import Animation
+from poom.entities import Enemy
 from poom.graphics import (
     BackgroundRenderer,
     CrosshairRenderer,
     EntityRenderer,
     FPSRenderer,
     Pipeline,
-    WallRenderer,
+    WallRenderer, GunRenderer,
 )
+from poom.gun import AnimatedGun, Gun
 from poom.map_loader import MapLoader
+from poom.player import Player
 
 SCREEN_SIZE = WIDTH, HEIGHT = 800, 600
 root = Path(os.getcwd())
@@ -29,7 +31,6 @@ def game_loop() -> None:
 
     map_loader = MapLoader(root / "assets" / "levels")
     map_ = map_loader.as_numpy(1)
-    player = Player(map_=map_, position=pg.Vector2(1.1, 1.1), angle=radians(45), fov=radians(90))
     clock = pg.time.Clock()
     dt: float = 0
 
@@ -45,23 +46,38 @@ def game_loop() -> None:
         fov=radians(90),
         texture=pg.image.load("assets/soldier.png"),
     )
+    enemies = [soldier1, soldier2]
+
+    gun = Gun(map_, 1, 25)
+    animated_gun = AnimatedGun(
+        gun,
+        Animation.from_dir(Path("assets/gun"), 10, 2),
+    )
+    player = Player(
+        map_=map_,
+        gun=animated_gun,
+        position=pg.Vector2(1.1, 1.1),
+        angle=radians(45),
+        fov=radians(90),
+        enemies=enemies,
+    )
     renderers = [
         BackgroundRenderer(pg.image.load("assets/skybox.png"), map_.shape[0]),
         WallRenderer(map_, player),
-        EntityRenderer([soldier1, soldier2]),
+        EntityRenderer(enemies),
         CrosshairRenderer(),
         FPSRenderer(clock),
+        GunRenderer(animated_gun),
     ]
     pipeline = Pipeline(player, renderers)
 
     run = True
     while run:
         # TODO: event handler
-        events = pg.event.get()
-        for event in events:
+        for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
-        player.update(dt, events)
+        player.update(dt)
         pipeline.render(screen)
         dt = clock.tick() / 1000
     pg.quit()
