@@ -1,14 +1,13 @@
 """Describes player."""
-from typing import Final, List, Sequence, Collection
+from typing import Final, Sequence, Collection
 
 import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
-from pygame.event import Event
 from pygame.math import Vector2
 
 from poom.entities import Pawn
-from poom.gun import Gun, AnimatedGun
+from poom.gun import AnimatedGun
 
 
 class Player(Pawn):
@@ -36,6 +35,7 @@ class Player(Pawn):
 
     @property
     def hitbox_width(self) -> float:
+        """Return player hitbox width."""
         return 0.5
 
     def update(self, dt: float) -> None:
@@ -93,5 +93,9 @@ class Player(Pawn):
         self._shoot(keys)
 
     def _shoot(self, keys: Sequence[bool]) -> None:
+        """Shoot, if space pressed.
+
+        :param keys: array of keys
+        """
         if keys[pg.K_SPACE]:
             self._gun.shoot(self._position, self._angle, self._enemies)
