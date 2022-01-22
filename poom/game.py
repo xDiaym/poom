@@ -33,22 +33,19 @@ def game_loop() -> None:
     clock = pg.time.Clock()
     dt: float = 0
 
-    soldier1 = Enemy(
-        position=pg.Vector2(5, 5),
-        angle=radians(45),
-        fov=radians(90),
-        texture=pg.image.load("assets/soldier.png"),
-    )
+    source = pg.image.load(root / "assets" / "front_attack" / "0.png")
     soldier2 = Enemy(
-        position=pg.Vector2(5.25, 4),
+        position=pg.Vector2(5.5, 5.5),
         angle=radians(45),
         fov=radians(90),
-        texture=pg.image.load("assets/soldier.png"),
+        texture=source,
+        map_=map_,
+        enemy=player,
     )
     renderers = [
         BackgroundRenderer(pg.image.load("assets/skybox.png"), map_.shape[0]),
         WallRenderer(map_, player),
-        EntityRenderer([soldier1, soldier2]),
+        EntityRenderer([soldier2]),
         CrosshairRenderer(),
         FPSRenderer(clock),
     ]
@@ -70,7 +67,7 @@ def game_loop() -> None:
         if keys[pg.K_d]:
             player._angle += dt * 5
         pipeline.render(screen)
-
+        soldier2.update(dt)
         dt = clock.tick() / 1000
     pg.quit()
 

@@ -9,6 +9,7 @@
 build/
 **.c
 **.so
+**.pyd
 
 # Testing, linting, coverage, etc.
 /cython_debug/
