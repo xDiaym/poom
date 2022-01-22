@@ -1,6 +1,7 @@
 from os import getcwd, listdir
 from pathlib import Path
 from typing import List, Union
+
 import pygame as pg
 
 root = Path(getcwd())
