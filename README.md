@@ -18,3 +18,14 @@ cd poom
 pip install -r requirements.txt
 python setup.py build_ext --inplace
 ```
+
+## Control
+|    Key    | Action        |
+|:---------:|:--------------|
+| `W`       | Move forward  |
+| `A`       | Rotate left   |
+| `S`       | Mova backward |
+| `D`       | Rotate right  |
+| `<`       | Move left     |
+| `>`       | Move right    |
+| `<space>` | Shoot         |

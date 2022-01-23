@@ -19,11 +19,11 @@ cdef struct Intersection:
 
 # TODO: assert zero division
 @cython.cdivision(True)
-cdef Intersection cast_wall(
+cdef Intersection cast_ray(
     np.ndarray[np.int8_t, ndim=2] map_,
     Vec2f player,
     float angle,
-    float max_distance = 20.0,
+    float max_distance = 100.0,
 ):
     cdef float distance = 0, offset = 0
     cdef int is_vertical = 0
@@ -58,6 +58,17 @@ cdef Intersection cast_wall(
     return Intersection(max_distance, 0, -1)
 
 
+def shoot(
+    np.ndarray[np.int8_t, ndim=2] map_,
+    float x0,
+    float y0,
+    float angle,
+    float max_distance = 100.0,
+) -> float:
+    cdef Intersection intersection = cast_ray(map_, Vec2f(x0, y0), angle, max_distance)
+    return intersection.distance
+
+
 # Ignore zero division errors due to performance reasons
 # TODO: assert zero detalization
 @cython.cdivision(True)
@@ -85,7 +96,7 @@ def draw_walls(
         alpha = x / <float>width * fov
         angle = view - fov / 2 + alpha
 
-        intersection = cast_wall(map_, Vec2f(x0, y0), angle)
+        intersection = cast_ray(map_, Vec2f(x0, y0), angle)
 
         stencil[x] = intersection.distance
         # Zero index reversed for empty cell, so decrement index

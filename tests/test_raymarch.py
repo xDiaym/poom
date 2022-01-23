@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from poom.ray_march import ray_march
+from poom.pooma.ray_march import shoot
 
 Map = NDArray[np.int8]
 
@@ -28,8 +28,12 @@ def map_() -> Map:
         pytest.param(1, 1, np.pi / 4, 2 ** 0.5, id="pi/2 angle"),
     ],
 )
-def test_ray_march(
-    map_: Map, x0: float, y0: float, angle: float, expected: float
+def test_shoot(
+    map_: Map,
+    x0: float,
+    y0: float,
+    angle: float,
+    expected: float,
 ) -> None:
-    dist = ray_march(map_, x0, y0, angle)
+    dist = shoot(map_, x0, y0, angle)
     assert dist == pytest.approx(expected)

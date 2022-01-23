@@ -25,3 +25,10 @@ def draw_sprite(
     angle: float,
     fov: float,
 ) -> None: ...
+def shoot(
+    map_: NDArray[np.int8],
+    x0: float,
+    y0: float,
+    angle: float,
+    max_distance: float = 100.0,
+) -> float: ...
