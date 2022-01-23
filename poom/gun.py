@@ -34,7 +34,7 @@ class Gun:
 
     def __init__(
         self,
-        level_map: NDArray[np.float32],
+        level_map: NDArray[np.int8],
         delay: float,
         damage: float,
     ) -> None:

@@ -26,7 +26,7 @@ def draw_sprite(
     fov: float,
 ) -> None: ...
 def shoot(
-    map_: NDArray[np.float32],
+    map_: NDArray[np.int8],
     x0: float,
     y0: float,
     angle: float,

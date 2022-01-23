@@ -20,7 +20,7 @@ class Player(Pawn):
     def __init__(
         self,
         *,
-        map_: NDArray[np.float32],
+        map_: NDArray[np.int8],
         gun: AnimatedGun,
         position: Vector2,
         angle: float,
