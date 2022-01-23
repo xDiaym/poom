@@ -74,7 +74,7 @@ class BackgroundRenderer(AbstractRenderer):
         :param surface: rendering surface(canvas)
         :param viewer: camera-like object
         """
-        width, height = surface.get_size()
+        width = self._skybox.get_width()
         offset = -self._world_size * degrees(viewer.angle) % width
         for third in range(-1, 2):
             skybox_position = (offset + third * width, 0)
