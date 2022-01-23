@@ -81,6 +81,8 @@ class Chase(AbstractAIState):
 
     @property
     def current_point(self) -> pg.Vector2:
+        if len(self._path) == 0:
+            return self._context.owner.position
         point = pg.Vector2(*self._path[self._current_point_index])
         return point + pg.Vector2(0.5)
 
