@@ -38,7 +38,7 @@ def game_loop() -> None:
     gun = Gun(map_, 1, 25)
     animated_gun = AnimatedGun(
         gun,
-        Animation.from_dir(Path("assets/gun"), 10, 2),
+        Animation.from_dir(Path("assets/gun"), 20, 2),
     )
 
     enemies = []
