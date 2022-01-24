@@ -1,5 +1,5 @@
 """Describes player."""
-from typing import Final, Sequence, Collection
+from typing import Collection, Final, Sequence
 
 import numpy as np
 import pygame as pg

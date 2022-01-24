@@ -19,7 +19,6 @@ Coords = Tuple[int, int]
 
 class EnemyIntelligence:
     def __init__(self, owner: Viewer, enemy: Viewer, map_: NDArray[np.int8]) -> None:
-        self._prev_state = None
         self._owner = owner
         self._enemy = enemy
         self._map = map_
@@ -30,9 +29,9 @@ class EnemyIntelligence:
         return self._owner
 
     def set_state(self, state: "AbstractAIState") -> None:
-        self._prev_state, self._state = self._state, state
+        self._state = state
 
-    def update(self, dt: float) -> float:
+    def update(self, dt: float) -> None:
         self._state.update(dt)
 
 
@@ -52,7 +51,7 @@ class Chase(AbstractAIState):
     epsilon: Final[float] = 1e-2
     chasing_speed: Final[float] = 0.6
     max_steps: Final[int] = 2
-    max_distance: Final[int] = 1.5
+    max_distance: Final[float] = 1.5
 
     def __init__(
         self,
@@ -66,12 +65,18 @@ class Chase(AbstractAIState):
         )
 
         self._enemy = enemy
-        self._grid = Grid(matrix=map_)
-        self._finder = BestFirst()
-        start = list(map(int, context.owner.position))
-        end = list(map(int, enemy.position))
-        self._path = self._find_path(start, end)[1 : self.max_steps + 1]
-        self._current_point_index = 0
+        self.algo = self._is_wall
+        if self.algo:
+            self._grid = Grid(matrix=map_)
+            self._finder = BestFirst()
+            start = list(map(int, context.owner.position))
+            end = list(map(int, enemy.position))
+            self._path = self._find_path(start, end)[1 : self.max_steps + 1]
+            self._current_point_index = 0
+        else:
+            self.stop = enemy.position - context.owner.position
+            self.stop.scale_to_length(2)
+            self.stop += context.owner.position
 
     def _find_path(self, start: Coords, dest: Coords) -> List[Coords]:
         point1 = self._grid.node(*start)
@@ -84,22 +89,45 @@ class Chase(AbstractAIState):
         point = pg.Vector2(*self._path[self._current_point_index])
         return point + pg.Vector2(0.5)
 
+    @property
+    def _is_wall(self) -> bool:
+        direction = self._enemy.position - self._context.owner.position
+        signX = 1 if direction.x > 0 else -1
+        signY = 1 if direction.y > 0 else -1
+        x, y = (
+            self._context.owner.position.x + 0.5 * signX,
+            self._context.owner.position.x + 0.5 * signY,
+        )
+        if not self._context._map[int(y)][int(x)]:
+            return True
+        return False
+
     def update(self, dt: float) -> None:
         owner = self._context.owner
-        direction = self.current_point - owner.position
+        if self.algo == 0 and self._is_wall:
+            self._context.set_state(
+                Chase(self._context, self._enemy, self._context._map)
+            )
+            return
+        if self.algo:
+            self.direction = self.current_point - owner.position
+        else:
+            self.direction = self.stop - owner.position
         target_distance = (owner.position - self._enemy.position).magnitude()
 
         if target_distance < self.max_distance:
             self._context.set_state(Attack(self._context))
             return
 
-        owner._position += direction.normalize() * self.chasing_speed * dt
-        if direction.magnitude() < self.epsilon:
-            if self._current_point_index == len(self._path) - 1:
-                state = Attack(self._context)
-                self._context.set_state(state)
+        owner._position += self.direction.normalize() * self.chasing_speed * dt
+        if self.direction.magnitude() < self.epsilon:
+            if self.algo:
+                if self._current_point_index == len(self._path) - 1:
+                    self._context.set_state(Attack(self._context))
+                else:
+                    self._current_point_index += 1
             else:
-                self._current_point_index += 1
+                self._context.set_state(Attack(self._context))
         self.walking_animation.update(dt)
         # ohh
         self._context.owner._texture = self.walking_animation.current_frame
@@ -111,7 +139,7 @@ class Attack(AbstractAIState):
         self.fire_animation = Animation.from_dir(root / "assets" / "front_attack", 3, 1)
         pg.mixer.init()
         pg.mixer.music.load(root / "assets" / "dsshotgn.wav")
-        pg.mixer.music.set_volume(0.2)
+        pg.mixer.music.set_volume(0)
         pg.mixer.music.play(1)
 
     def update(self, dt: float) -> None:

@@ -290,15 +290,9 @@ class GunRenderer(AbstractRenderer):
         self._gun = gun
 
     def __call__(
-        self,
-        surface: pg.Surface,
-        _stencil: StencilBuffer,
-        _viewer: Viewer
+        self, surface: pg.Surface, _stencil: StencilBuffer, _viewer: Viewer
     ) -> None:
         texture = self._gun.texture
         s_width, s_height = surface.get_size()
         t_width, t_height = texture.get_size()
-        surface.blit(
-            texture,
-            ((s_width - t_width) // 2, s_height - t_height)
-        )
+        surface.blit(texture, ((s_width - t_width) // 2, s_height - t_height))

@@ -20,7 +20,9 @@ class Animation:
     def flip_images(self) -> None:
         for index, image in enumerate(self._images):
             self._images[index] = pg.transform.flip(
-                image, flip_x=True, flip_y=False,
+                image,
+                flip_x=True,
+                flip_y=False,
             )
 
     def reset(self) -> None:
