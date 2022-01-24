@@ -91,14 +91,18 @@ class Chase(AbstractAIState):
 
     @property
     def _is_wall(self) -> bool:
-        direction = self._enemy.position - self._context.owner.position
+        owner = self._context.owner
+        direction = self._enemy.position - owner.position
         signX = 1 if direction.x > 0 else -1
         signY = 1 if direction.y > 0 else -1
-        x, y = (
-            self._context.owner.position.x + 0.5 * signX,
-            self._context.owner.position.x + 0.5 * signY,
+        next_x, next_y = (
+            owner.position.x + 0.5 * signX,
+            owner.position.y + 0.5 * signY,
         )
-        if not self._context._map[int(y)][int(x)]:
+        if (
+            not self._context._map[int(next_y)][int(owner.position.x)]
+            or not self._context._map[int(owner.position.y)][int(next_x)]
+        ):
             return True
         return False
 
