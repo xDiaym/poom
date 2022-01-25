@@ -144,7 +144,9 @@ class Chase(AbstractAIState):
 class Attack(AbstractAIState):
     def __init__(self, context: EnemyIntelligence) -> None:
         super().__init__(context)
-        self.fire_animation = Animation.from_dir(root / "assets" / "front_attack", 0.7, 1)
+        self.fire_animation = Animation.from_dir(
+            root / "assets" / "front_attack", 0.7, 1
+        )
         pg.mixer.init()
         pg.mixer.music.load(root / "assets" / "dsshotgn.wav")
         pg.mixer.music.set_volume(0)
