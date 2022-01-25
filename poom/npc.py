@@ -52,6 +52,8 @@ class Chase(AbstractAIState):
     chasing_speed: Final[float] = 0.6
     max_steps: Final[int] = 2
     max_distance: Final[float] = 1.5
+    best_first: Final[int] = 1
+    vector_form: Final[int] = 0
 
     def __init__(
         self,
@@ -66,7 +68,7 @@ class Chase(AbstractAIState):
 
         self._enemy = enemy
         self.algo = self._is_wall
-        if self.algo:
+        if self.algo == self.best_first:
             self._grid = Grid(matrix=map_)
             self._finder = BestFirst()
             start = list(map(int, context.owner.position))
@@ -93,11 +95,11 @@ class Chase(AbstractAIState):
     def _is_wall(self) -> bool:
         owner = self._context.owner
         direction = self._enemy.position - owner.position
-        signX = 1 if direction.x > 0 else -1
-        signY = 1 if direction.y > 0 else -1
+        sign_x = 1 if direction.x > 0 else -1
+        sign_y = 1 if direction.y > 0 else -1
         next_x, next_y = (
-            owner.position.x + 0.5 * signX,
-            owner.position.y + 0.5 * signY,
+            owner.position.x + 0.5 * sign_x,
+            owner.position.y + 0.5 * sign_y,
         )
         if (
             not self._context._map[int(next_y)][int(owner.position.x)]
@@ -108,12 +110,12 @@ class Chase(AbstractAIState):
 
     def update(self, dt: float) -> None:
         owner = self._context.owner
-        if self.algo == 0 and self._is_wall:
+        if self.algo == self.vector_form and self._is_wall:
             self._context.set_state(
                 Chase(self._context, self._enemy, self._context._map)
             )
             return
-        if self.algo:
+        if self.algo == self.best_first:
             self.direction = self.current_point - owner.position
         else:
             self.direction = self.stop - owner.position
@@ -125,7 +127,7 @@ class Chase(AbstractAIState):
 
         owner._position += self.direction.normalize() * self.chasing_speed * dt
         if self.direction.magnitude() < self.epsilon:
-            if self.algo:
+            if self.algo == self.best_first:
                 if self._current_point_index == len(self._path) - 1:
                     self._context.set_state(Attack(self._context))
                 else:
