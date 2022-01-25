@@ -12,9 +12,9 @@ from poom.graphics import (
     CrosshairRenderer,
     EntityRenderer,
     FPSRenderer,
+    GunRenderer,
     Pipeline,
     WallRenderer,
-    GunRenderer,
 )
 from poom.gun import AnimatedGun, Gun
 from poom.map_loader import MapLoader
@@ -35,7 +35,7 @@ def game_loop() -> None:
     clock = pg.time.Clock()
     dt: float = 0
 
-    gun = Gun(map_, 1, 25)
+    gun = Gun(map_, 2, 25)
     animated_gun = AnimatedGun(
         gun,
         Animation.from_dir(Path("assets/gun"), 20, 2),
@@ -53,7 +53,7 @@ def game_loop() -> None:
 
     source = pg.image.load(root / "assets" / "front_attack" / "0.png")
     soldier2 = Enemy(
-        position=pg.Vector2(5.5, 5.5),
+        position=pg.Vector2(8.5, 8.5),
         angle=radians(45),
         fov=radians(90),
         texture=source,

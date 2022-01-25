@@ -48,6 +48,7 @@ class Animation:
             )
         return cls(images, speed)
 
+
 class ScreenResizer:
     def __init__(self, width: int, height: int, root: Path) -> None:
         self.resize(width, height, root)
