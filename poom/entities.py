@@ -7,7 +7,7 @@ import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 
-from poom.map_loader import map2d
+from poom.level import map2d
 from poom.npc import EnemyIntelligence
 from poom.viewer import Viewer
 

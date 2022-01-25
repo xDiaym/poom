@@ -18,7 +18,7 @@ from poom.graphics import (
     WallRenderer,
 )
 from poom.gun import create_animated_gun
-from poom.map_loader import MapLoader
+from poom.level import Level
 from poom.player import Player
 
 # screen = pg.display.set_mode(settings.screen_size, vsync=1)
@@ -30,8 +30,8 @@ class GameScene(shared.AbstractScene):
     def __init__(self, context=shared.SceneContext):
         super().__init__(context)
         # self.screen = screen
-        self.map_loader = MapLoader(root / "assets" / "levels")
-        self.map_ = self.map_loader.as_numpy(1)
+        level = Level.from_dir(root / "assets" / "levels" / "1")
+        self.map_ = level.map_
 
         animated_gun = create_animated_gun(self.map_, 2, 25, root / "assets" / "gun", 2)
 
@@ -45,23 +45,24 @@ class GameScene(shared.AbstractScene):
             enemies=self.enemies,
         )
 
-        self.source = pg.image.load(root / "assets" / "front_attack" / "0.png")
-        self.soldier2 = Enemy(
-            position=pg.Vector2(8.5, 8.5),
-            angle=radians(45),
-            fov=radians(90),
-            texture=self.source,
-            map_=self.map_,
-            enemy=self.player,
-        )
-        self.enemies.append(self.soldier2)
+        enemy_texture = pg.image.load(root / "assets" / "front_attack" / "0.png")
+        for position in level.enemies_positions:
+            enemy = Enemy(
+                position=position,
+                angle=radians(45),
+                fov=radians(90),
+                texture=enemy_texture,
+                map_=level.map_,
+                enemy=self.player,
+            )
+            self.enemies.append(enemy)
 
         self.renderers = [
             BackgroundRenderer(
                 pg.image.load(root / "assets" / "skybox.png"), self.map_.shape[0]
             ),
             WallRenderer(self.map_, self.player),
-            EntityRenderer([self.soldier2]),
+            EntityRenderer(self.enemies),
             CrosshairRenderer(),
             FPSRenderer(clock),
             GunRenderer(animated_gun),
