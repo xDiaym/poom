@@ -1,9 +1,12 @@
+import json
 from abc import ABC, abstractmethod
 from os import listdir
 from pathlib import Path
+from typing import Collection, List
 
 import pygame as pg
 import pygame_gui
+from pygame.event import Event
 
 
 class Animation:
@@ -49,18 +52,27 @@ class Animation:
         return cls(images, speed)
 
 
-class ScreenResizer:
-    def __init__(self, width: int, height: int, root: Path) -> None:
-        self.resize(width, height, root)
+class Singleton(type):
+    _instances = {}
 
-    def resize(self, width, height, root) -> None:
-        self.size = self.width, self.height = width, height
-        self.surface = pg.display.set_mode(self.size)
-        self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "back.png").convert_alpha(),
-            (width, height),
-        )
-        self.manager = pygame_gui.UIManager(self.size, root / "assets" / "style.json")
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+# TODO: move to file
+class Settings(dict, metaclass=Singleton):
+    def __init__(self, root):
+        with open(root / "assets" / "settings.json") as file:
+            data = json.load(file)
+        for key in data:
+            setattr(self, key, data[key])
+
+    def update(self, root):
+        with open(root / "assets" / "settings.json", "w") as file:
+            json.dump(vars(self), file)
 
 
 class AbstractScene(ABC):
@@ -68,7 +80,7 @@ class AbstractScene(ABC):
         self._context = context
 
     @abstractmethod
-    def on_click(self, event) -> None:
+    def on_event(self, event: Collection[Event]) -> None:
         pass
 
     @abstractmethod
@@ -81,7 +93,8 @@ class AbstractScene(ABC):
 
 
 class SceneContext:
-    def __init__(self, first_scene) -> None:
+    def __init__(self, first_scene: AbstractScene, screen: pg.Surface) -> None:
+        self.screen = screen
         self._scene = first_scene(self)
 
     @property
@@ -92,10 +105,11 @@ class SceneContext:
     def scene(self, value: AbstractScene) -> None:
         self._scene = value
 
-    def handler(self, event) -> None:
-        self._scene.on_click(event)
+    def on_event(self, events: List[Event]) -> None:
+        self._scene.on_event(events)
 
-    def render(self, screen: ScreenResizer, clock: pg.time.Clock) -> None:
-        screen.surface.blit(screen.background, (0, 0))
-        self._scene.render(screen.surface)
-        self._scene.update(clock.tick() / 1000)
+    def render(self) -> None:
+        self._scene.render()
+
+    def update(self, dt):
+        self._scene.update(dt)
