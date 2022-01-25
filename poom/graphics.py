@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 
 from poom.entities import Entity
 from poom.gun import AnimatedGun
-from poom.map_loader import Map
+from poom.level import Map
 from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint:disable=E0611
 from poom.viewer import Viewer
 
