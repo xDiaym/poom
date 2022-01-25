@@ -11,7 +11,7 @@ class Animation:
 
     def __init__(self, images: List[pg.Surface], speed: float) -> None:
         self._images = images
-        self._speed = speed
+        self._speed = len(images) / speed
         self._animation_rate: float = 0
 
     def update(self, dt: float) -> None:

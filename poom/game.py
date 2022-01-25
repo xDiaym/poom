@@ -5,7 +5,6 @@ from typing import List
 
 import pygame as pg
 
-from poom.animated import Animation
 from poom.entities import Enemy
 from poom.graphics import (
     BackgroundRenderer,
@@ -16,7 +15,7 @@ from poom.graphics import (
     Pipeline,
     WallRenderer,
 )
-from poom.gun import AnimatedGun, Gun
+from poom.gun import create_animated_gun
 from poom.map_loader import MapLoader
 from poom.player import Player
 
@@ -35,11 +34,7 @@ def game_loop() -> None:
     clock = pg.time.Clock()
     dt: float = 0
 
-    gun = Gun(map_, 2, 25)
-    animated_gun = AnimatedGun(
-        gun,
-        Animation.from_dir(Path("assets/gun"), 20, 2),
-    )
+    animated_gun = create_animated_gun(map_, 2, 25, root / "assets" / "gun", 2)
 
     enemies = []
     player = Player(

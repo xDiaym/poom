@@ -1,5 +1,7 @@
 """Gun and animated gun. Used for attacking."""
+from imp import reload
 from math import cos, radians, sin
+from pathlib import Path
 from typing import Collection
 
 import numpy as np
@@ -139,3 +141,15 @@ class AnimatedGun(Renderable):
             self._animation.update(dt)
         else:
             self._animation.reset()
+
+
+def create_animated_gun(
+    level_map: NDArray[np.int8],
+    reload_time: float,
+    damage: float,
+    animation_path: Path,
+    scale: float,
+) -> AnimatedGun:
+    gun = Gun(level_map, reload_time, damage)
+    animation = Animation.from_dir(animation_path, reload_time, scale)
+    return AnimatedGun(gun, animation)

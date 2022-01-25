@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 from pathfinding.core.grid import Grid
 from pathfinding.finder.best_first import BestFirst
 
-from poom.shared import Animation
+from poom.animated import Animation
 from poom.viewer import Viewer
 
 root = Path(getcwd())
@@ -63,7 +63,7 @@ class Chase(AbstractAIState):
     ) -> None:
         super().__init__(context)
         self.walking_animation = Animation.from_dir(
-            root / "assets" / "front_walk", 3, 1
+            root / "assets" / "front_walk", 1, 1
         )
 
         self._enemy = enemy
@@ -144,7 +144,7 @@ class Chase(AbstractAIState):
 class Attack(AbstractAIState):
     def __init__(self, context: EnemyIntelligence) -> None:
         super().__init__(context)
-        self.fire_animation = Animation.from_dir(root / "assets" / "front_attack", 3, 1)
+        self.fire_animation = Animation.from_dir(root / "assets" / "front_attack", 0.7, 1)
         pg.mixer.init()
         pg.mixer.music.load(root / "assets" / "dsshotgn.wav")
         pg.mixer.music.set_volume(0)
