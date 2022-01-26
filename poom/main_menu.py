@@ -31,10 +31,10 @@ class Zombie(pg.sprite.Sprite, metaclass=shared.Singleton):
         self.screen = screen
         self.v = 30
         self.walking_animation = Animation.from_dir(
-            root / "assets" / "zombie" / "walk", 0.75, 0.1875
+            root / "assets" / "sprites" / "side_walk" / "walk", 0.75, 0.1875
         )
         self.rotation_animation = Animation.from_dir(
-            root / "assets" / "zombie" / "rotate", 0.75, 0.1875
+            root / "assets" / "sprites" / "side_walk" / "rotate", 0.75, 0.1875
         )
         self.image = self.walking_animation.current_frame
         self.rect = self.image.get_rect()
@@ -81,7 +81,7 @@ class WelcomeScene(shared.AbstractScene):
         self.zombie = Zombie(self.screen)
         width, height = self.screen.get_width(), self.screen.get_height()
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "back.png").convert_alpha(),
+            pg.image.load(root / "assets" / "textures" / "back.png").convert_alpha(),
             (width, height),
         )
         self.poom_label = UILabel(
@@ -137,7 +137,6 @@ class WelcomeScene(shared.AbstractScene):
 
 class SettingsScene(shared.AbstractScene):
     def __init__(self, context: shared.SceneContext) -> None:
-        print("hello")
         super().__init__(context)
         self.screen = self._context.screen
         self.manager = pygame_gui.UIManager(
@@ -146,7 +145,7 @@ class SettingsScene(shared.AbstractScene):
         self.zombie = Zombie(self.screen)
         width, height = self.screen.get_width(), self.screen.get_height()
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "back.png").convert_alpha(),
+            pg.image.load(root / "assets" / "textures" / "back.png").convert_alpha(),
             (width, height),
         )
         self.settings_label = UILabel(
@@ -265,7 +264,7 @@ class StatiscticsScene(shared.AbstractScene):
         self.zombie = Zombie(self.screen)
         width, height = self.screen.get_width(), self.screen.get_height()
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "back.png").convert_alpha(),
+            pg.image.load(root / "assets" / "textures" / "back.png").convert_alpha(),
             (width, height),
         )
         self.stats_label = UILabel(
