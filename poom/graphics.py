@@ -2,13 +2,14 @@
 import os
 from abc import ABC, abstractmethod
 from math import degrees
+from pathlib import Path
 from typing import Any, Collection, Final, Optional, Tuple, Union
 
 import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 
-from poom.entities import Entity
+from poom.entities import Entity, WithHealth
 from poom.gun import AnimatedGun
 from poom.level import Map
 from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint:disable=E0611
@@ -119,6 +120,43 @@ class FPSRenderer(AbstractRenderer):
         fps_string = "{0:.0f}".format(fps)
         fps_image = self._font.render(fps_string, True, color)  # noqa: WPS425
         surface.blit(fps_image, self._position)
+
+
+root = Path(os.getcwd())
+
+
+class HUDRenderer(AbstractRenderer):
+    health_bar_length: Final[int] = 200
+    health_bar_height: Final[int] = 30
+
+    def __init__(self, with_health: WithHealth) -> None:
+        self._with_health = with_health
+        self._font = pg.font.Font(None, 30)
+
+    def __call__(self, surface: pg.Surface, *args: Any, **kwargs: Any) -> None:
+        width, height = surface.get_size()
+        pg.draw.rect(
+            surface,
+            "black",
+            (width * 0.7, height * 0.9, self.health_bar_length, self.health_bar_height),
+        )
+        pg.draw.rect(
+            surface,
+            "green",
+            (
+                width * 0.7 + 5,
+                height * 0.9 + 5,
+                (self.health_bar_length - 10) * self._with_health.get_health_ratio(),
+                20,
+            ),
+        )
+        percents = max(self._with_health.get_health(), 0)
+        text = self._font.render(f"{percents} %", True, "red")
+        text_x, text_y = (
+            width * 0.7 + (self.health_bar_length - text.get_width()) * 0.5,
+            height * 0.9 + (self.health_bar_height - text.get_height()) * 0.5,
+        )
+        surface.blit(text, (text_x, text_y))
 
 
 ColorLike = Union[pg.Color, Tuple[int, int, int]]
