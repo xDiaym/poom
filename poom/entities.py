@@ -48,3 +48,13 @@ class Entity(ABC, Viewer):
 
 class Pawn(Entity, Damagable, ABC):
     """Entity with health."""
+
+
+class WithHealth(ABC):
+    @abstractmethod
+    def get_health(self) -> float:
+        """Return current health."""
+
+    @abstractmethod
+    def get_health_ratio(self) -> float:
+        """Return ration between current health and max health."""

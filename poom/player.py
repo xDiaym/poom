@@ -6,11 +6,11 @@ import pygame as pg
 from numpy.typing import NDArray
 from pygame.math import Vector2
 
-from poom.entities import Pawn
+from poom.entities import Pawn, WithHealth
 from poom.gun import AnimatedGun
 
 
-class Player(Pawn):
+class Player(Pawn, WithHealth):
     """Player."""
 
     max_health: Final[float] = 100
@@ -52,8 +52,15 @@ class Player(Pawn):
         :param damage: damage by which health is reduced
         """
         self._health -= damage
-        print(self._health)
         # TODO: process player death.
+
+    def get_health(self) -> float:
+        """Return current health."""
+        return self._health
+
+    def get_health_ratio(self) -> float:
+        """Return ration between current health and max health."""
+        return self._health / self.max_health
 
     def _move(self, dt: float, keys: Sequence[bool]) -> None:
         direction = Vector2(0)

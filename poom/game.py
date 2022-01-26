@@ -13,6 +13,7 @@ from poom.graphics import (
     EntityRenderer,
     FPSRenderer,
     GunRenderer,
+    HUDRenderer,
     Pipeline,
     WallRenderer,
 )
@@ -70,6 +71,7 @@ class GameScene(shared.AbstractScene):
             CrosshairRenderer(),
             FPSRenderer(clock),
             GunRenderer(animated_gun),
+            HUDRenderer(self.player),
         ]
         self.pipeline = Pipeline(self.player, self.renderers)
 
