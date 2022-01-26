@@ -1,5 +1,5 @@
 """Describes player."""
-from typing import Collection, Final, Sequence
+from typing import Callable, Collection, Final, Sequence
 
 import numpy as np
 import pygame as pg
@@ -9,6 +9,7 @@ from pygame.math import Vector2
 from poom.entities import Pawn, WithHealth
 from poom.gun import AnimatedGun
 
+OnDeathCallback = Callable[[], None]
 
 class Player(Pawn, WithHealth):
     """Player."""
@@ -32,6 +33,11 @@ class Player(Pawn, WithHealth):
         self._map = map_
         self._health = self.max_health
         self._enemies = enemies
+        self._on_death: OnDeathCallback  = lambda: None
+
+    def on_death(self, cb: OnDeathCallback) -> None:
+        """Set callback for death event."""
+        self._on_death = cb
 
     @property
     def hitbox_width(self) -> float:
@@ -52,7 +58,8 @@ class Player(Pawn, WithHealth):
         :param damage: damage by which health is reduced
         """
         self._health -= damage
-        # TODO: process player death.
+        if self._health <= 0:
+            self._on_death()
 
     def get_health(self) -> float:
         """Return current health."""

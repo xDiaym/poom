@@ -41,7 +41,7 @@ class Enemy(Pawn, Renderable):
         self._intelligence = EnemyIntelligence(self, ai_enemy, ai_map)
         self._texture = texture
         self._health = self.max_health
-        self._gun = Gun(map_, 1, 15)
+        self._gun = Gun(map_, 1, 100)
         self._enemies = entities
 
     @property

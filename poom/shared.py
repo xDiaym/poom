@@ -64,6 +64,7 @@ class SceneContext:
 
     def render(self) -> None:
         self._scene.render()
+        pg.display.flip()
 
     def update(self, dt):
         self._scene.update(dt)

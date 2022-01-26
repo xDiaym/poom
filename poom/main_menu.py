@@ -4,13 +4,7 @@ from pathlib import Path
 import pygame as pg
 import pygame_gui
 from pygame_gui.core import ObjectID
-from pygame_gui.elements import (
-    UIButton,
-    UIDropDownMenu,
-    UIHorizontalSlider,
-    UILabel,
-    UITextBox,
-)
+from pygame_gui.elements import UIButton, UIDropDownMenu, UIHorizontalSlider, UILabel, UITextBox
 
 import poom.game as game
 import poom.shared as shared
