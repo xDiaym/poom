@@ -7,7 +7,6 @@ import pygame as pg
 
 import poom.main_menu as menu
 import poom.shared as shared
-from poom.entities import Enemy
 from poom.graphics import (
     BackgroundRenderer,
     CrosshairRenderer,
@@ -19,9 +18,9 @@ from poom.graphics import (
 )
 from poom.gun import create_animated_gun
 from poom.level import Level
+from poom.npc import Enemy
 from poom.player import Player
 
-# screen = pg.display.set_mode(settings.screen_size, vsync=1)
 root = Path(os.getcwd())
 clock = pg.time.Clock()
 
@@ -29,11 +28,12 @@ clock = pg.time.Clock()
 class GameScene(shared.AbstractScene):
     def __init__(self, context=shared.SceneContext):
         super().__init__(context)
-        # self.screen = screen
         level = Level.from_dir(root / "assets" / "levels" / "1")
         self.map_ = level.map_
 
-        animated_gun = create_animated_gun(self.map_, 2, 25, root / "assets" / "gun", 2)
+        animated_gun = create_animated_gun(
+            self.map_, 2, 25, root / "assets" / "sprites" / "gun", 2
+        )
 
         self.enemies = []
         self.player = Player(
@@ -45,21 +45,25 @@ class GameScene(shared.AbstractScene):
             enemies=self.enemies,
         )
 
-        enemy_texture = pg.image.load(root / "assets" / "front_attack" / "0.png")
+        enemy_texture = pg.image.load(
+            root / "assets" / "sprites" / "front_attack" / "0.png"
+        )
         for position in level.enemies_positions:
             enemy = Enemy(
+                texture=enemy_texture,
+                map_=level.map_,
+                entities=self.enemies,
+                ai_enemy=self.player,
                 position=position,
                 angle=radians(45),
                 fov=radians(90),
-                texture=enemy_texture,
-                map_=level.map_,
-                enemy=self.player,
             )
             self.enemies.append(enemy)
 
         self.renderers = [
             BackgroundRenderer(
-                pg.image.load(root / "assets" / "skybox.png"), self.map_.shape[0]
+                pg.image.load(root / "assets" / "textures" / "skybox.png"),
+                self.map_.shape[0],
             ),
             WallRenderer(self.map_, self.player),
             EntityRenderer(self.enemies),

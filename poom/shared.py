@@ -42,7 +42,7 @@ class AbstractScene(ABC):
         pass
 
     @abstractmethod
-    def render(self, render: pg.Surface) -> None:
+    def render(self) -> None:
         pass
 
 

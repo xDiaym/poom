@@ -46,4 +46,4 @@ class Level:
     def from_dir(cls, path: Path) -> "Level":
         map_ = load_map(path / "map.txt")
         positions = load_enemies_positions(path / "enemies.json")
-        return cls(map_, positions)
+        return cls(map_=map_, enemies_positions=positions)

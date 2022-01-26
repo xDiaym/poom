@@ -1,5 +1,5 @@
 """Gun and animated gun. Used for attacking."""
-from imp import reload
+import typing
 from math import cos, radians, sin
 from pathlib import Path
 from typing import Collection
@@ -65,7 +65,7 @@ class Gun:
         self,
         position: Vector2,
         angle: float,
-        enemies: Collection[Pawn],
+        enemies: Collection["Pawn"],
     ) -> None:
         """Shoot to enemies.
 
@@ -116,7 +116,7 @@ class AnimatedGun(Renderable):
         self,
         position: Vector2,
         angle: float,
-        enemies: Collection[Pawn],
+        enemies: Collection["Pawn"],
     ) -> None:
         """Shoot to enemies.
 

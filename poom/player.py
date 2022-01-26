@@ -52,6 +52,7 @@ class Player(Pawn):
         :param damage: damage by which health is reduced
         """
         self._health -= damage
+        print(self._health)
         # TODO: process player death.
 
     def _move(self, dt: float, keys: Sequence[bool]) -> None:
