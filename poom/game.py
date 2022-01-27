@@ -5,10 +5,12 @@ import time
 from typing import List
 
 import pygame as pg
+from pygame.event import Event
 
 from poom.credits import Credits
 from poom.records import Record, update_record
 from poom.settings import ROOT
+from poom.shared import Settings, SceneContext
 
 pg.mixer.init()  # noqa
 
@@ -87,7 +89,7 @@ class LevelScene(shared.AbstractScene):
         ]
         self._pipeline = Pipeline(self._player, self._renderers)
 
-    def on_event(self, events) -> None:
+    def on_event(self, events: List[Event]) -> None:
         pass
 
     def render(self) -> None:
@@ -114,36 +116,48 @@ class LevelScene(shared.AbstractScene):
         self._context.scene = Credits(self._context)
 
 
-def game_loop() -> None:
-    pg.init()
-    pg.font.init()
+class Game:
+    def __init__(self) -> None:
+        self._init()
+        self._run = True
+        self._settings = Settings(ROOT)
+        self._screen = pg.display.set_mode(self._settings.screen_size, vsync=1)
 
-    settings = shared.Settings(root)
-    screen = pg.display.set_mode(settings.screen_size, vsync=1)
-    sc = shared.SceneContext(screen)
-    sc.scene = WelcomeScene(sc)
-    clock = pg.time.Clock()
-    dt: float = 0
+    def stop(self) -> None:
+        self._run = False
 
-    run = True
-    while run:
-        # TODO: event handler
-        events = pg.event.get()
-        for event in events:
-            if event.type == pg.QUIT:
-                run = False
-            if event.type == pg.WINDOWMINIMIZED:
-                pg.mixer.music.pause()
-            if event.type == pg.WINDOWRESTORED:
-                pg.mixer.music.unpause()
-        sc.on_event(events)
-        sc.render()
-        dt = clock.tick() / 1000
-        sc.update(dt)
-    pg.quit()
-    settings.update(root)
+    def run(self) -> None:
+        sc = SceneContext(self._screen, self)
+        sc.scene = WelcomeScene(sc)
+        clock = pg.time.Clock()
+        dt: float = 0
+
+        while self._run:
+            # TODO: event handler
+            events = pg.event.get()
+            for event in events:
+                if event.type == pg.QUIT:
+                    self._run = False
+                if event.type == pg.WINDOWMINIMIZED:
+                    pg.mixer.music.pause()
+                if event.type == pg.WINDOWRESTORED:
+                    pg.mixer.music.unpause()
+            sc.on_event(events)
+            sc.render()
+            dt = clock.tick() / 1000
+            sc.update(dt)
+        self._deinit()
+
+    def _init(self) -> None:
+        pg.init()
+        pg.font.init()
+
+    def _deinit(self) -> None:
+        self._settings.update(ROOT)
+        pg.quit()
 
 
 def main(argv: List[str]) -> int:
-    game_loop()
+    game = Game()
+    game.run()
     return 0

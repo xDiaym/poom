@@ -1,6 +1,9 @@
 import json
 from abc import ABC, abstractmethod
-from typing import Collection, List, Optional
+from typing import TYPE_CHECKING, Collection, List, Optional
+
+if TYPE_CHECKING:
+    from poom.game import Game
 
 import pygame as pg
 from pygame.event import Event
@@ -47,13 +50,18 @@ class AbstractScene(ABC):
 
 
 class SceneContext:
-    def __init__(self, screen: pg.Surface) -> None:
+    def __init__(self, screen: pg.Surface, game: "Game") -> None:
         self._screen = screen
+        self._game = game
         self._scene: Optional[AbstractScene] = None
 
     @property
     def screen(self) -> pg.Surface:
         return self._screen
+
+    @property
+    def game(self) -> "Game":
+        return self._game
 
     @property
     def scene(self) -> AbstractScene:

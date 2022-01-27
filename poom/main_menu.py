@@ -130,7 +130,7 @@ class WelcomeScene(shared.AbstractScene):
                 if event.ui_element == self.statistics:
                     self._context.scene = StatiscticsScene(self._context)
                 if event.ui_element == self.quit:
-                    print("TODO")
+                    self._context.game.stop()
             self.manager.process_events(event)
 
     def render(self) -> None:
