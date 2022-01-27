@@ -1,8 +1,9 @@
 """Gun and animated gun. Used for attacking."""
 import typing
 from math import cos, radians, sin
+from os import getcwd
 from pathlib import Path
-from typing import Collection
+from typing import Collection, Final
 
 import numpy as np
 import pygame as pg
@@ -12,6 +13,8 @@ from pygame.math import Vector2
 from poom.animated import Animation
 from poom.entities import Pawn, Renderable
 from poom.pooma.ray_march import shoot
+
+root = Path(getcwd())
 
 
 def vec_point_distance(
@@ -103,6 +106,9 @@ class AnimatedGun(Renderable):
     Used as player gun.
     """
 
+    sound_path: Final[Path] = root / "assets" / "sounds" / "player_ssg.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
+
     def __init__(self, gun: Gun, animation: Animation) -> None:
         """Initialize animated gun.
 
@@ -111,6 +117,7 @@ class AnimatedGun(Renderable):
         """
         self._gun = gun
         self._animation = animation
+        self.channel = pg.mixer.Channel(2)
 
     def shoot(
         self,
@@ -124,6 +131,8 @@ class AnimatedGun(Renderable):
         :param angle: shooter angle
         :param enemies: enemies
         """
+        if not self.channel.get_busy():
+            self.channel.play(self.sound)
         self._gun.shoot(position, angle, enemies)
 
     @property

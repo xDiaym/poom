@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import operator
+from dataclasses import dataclass
 from os import listdir
 from pathlib import Path
 from textwrap import dedent
@@ -71,7 +71,7 @@ def create_text(
     screen_width: int,
     interval: int = 5,
 ) -> None:
-    y_position = start_y 
+    y_position = start_y
     for line in text.split("\n"):
         surface = font.render(line, True, (255, 36, 0))
         left = (screen_width - surface.get_width()) // 2
@@ -80,11 +80,7 @@ def create_text(
 
 
 def load_logos(
-    path: Path,
-    group: Group,
-    start_y: int,
-    screen_width: int,
-    scale: float = 1
+    path: Path, group: Group, start_y: int, screen_width: int, scale: float = 1
 ) -> None:
     logos = logos_loader(path, scale)
 
@@ -102,11 +98,13 @@ def load_logos(
     FloatingSurface(group, surface, pg.Vector2(surface_x, start_y))
 
 
-
-TEXT = dedent("""
+TEXT = dedent(
+    """
 Developed by: Matthew Nekirov, Ilya Finatov
 Thanks for playing!
-""")
+"""
+)
+
 
 class Credits(AbstractScene):
     def __init__(self, context: "SceneContext") -> None:
@@ -125,12 +123,23 @@ class Credits(AbstractScene):
         font = Font(ROOT / "assets" / "font.ttf", 40)
 
         create_text("Poom", big_font, self._group, screen_size[1], screen_size[0])
-        create_text("Yandex.Lyceum project", font, self._group, screen_size[1] + 120, screen_size[0])
+        create_text(
+            "Yandex.Lyceum project",
+            font,
+            self._group,
+            screen_size[1] + 120,
+            screen_size[0],
+        )
 
-        load_logos(ROOT / "assets" / "logo", self._group, screen_size[1] + 250, screen_size[0], 0.22)
+        load_logos(
+            ROOT / "assets" / "logo",
+            self._group,
+            screen_size[1] + 250,
+            screen_size[0],
+            0.22,
+        )
 
         create_text(TEXT, font, self._group, screen_size[1] + 400, screen_size[0])
-
 
     def render(self) -> None:
         self._context.screen.blit(self._bacground, (0, 0))

@@ -5,11 +5,21 @@ from typing import List
 
 import pygame as pg
 
+pg.mixer.init()  # noqa
+
 import poom.main_menu as menu
 import poom.shared as shared
 from poom.credits import Credits
-from poom.graphics import (BackgroundRenderer, CrosshairRenderer, EntityRenderer, FPSRenderer, GunRenderer, HUDRenderer,
-                           Pipeline, WallRenderer)
+from poom.graphics import (
+    BackgroundRenderer,
+    CrosshairRenderer,
+    EntityRenderer,
+    FPSRenderer,
+    GunRenderer,
+    HUDRenderer,
+    Pipeline,
+    WallRenderer,
+)
 from poom.gun import create_animated_gun
 from poom.level import Level
 from poom.npc import Enemy
@@ -79,7 +89,7 @@ class GameScene(shared.AbstractScene):
         self.player.update(dt)
         for npc in self.enemies:
             npc.update(dt)
-    
+
     def _load_title(self) -> None:
         self._context.scene = Credits(self._context)
 

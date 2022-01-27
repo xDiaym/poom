@@ -1,4 +1,5 @@
 """Describes player."""
+from pathlib import Path
 from typing import Callable, Collection, Final, Sequence
 
 import numpy as np
@@ -8,8 +9,10 @@ from pygame.math import Vector2
 
 from poom.entities import Pawn, WithHealth
 from poom.gun import AnimatedGun
+from poom.settings import ROOT
 
 OnDeathCallback = Callable[[], None]
+
 
 class Player(Pawn, WithHealth):
     """Player."""
@@ -17,6 +20,8 @@ class Player(Pawn, WithHealth):
     max_health: Final[float] = 100
     movement_speed: Final[float] = 5
     rotation_speed: Final[float] = 3
+    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "player_injured.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(
         self,
@@ -33,7 +38,8 @@ class Player(Pawn, WithHealth):
         self._map = map_
         self._health = self.max_health
         self._enemies = enemies
-        self._on_death: OnDeathCallback  = lambda: None
+        self._on_death: OnDeathCallback = lambda: None
+        self._channel = pg.mixer.Channel(1)
 
     def on_death(self, cb: OnDeathCallback) -> None:
         """Set callback for death event."""
@@ -57,6 +63,7 @@ class Player(Pawn, WithHealth):
 
         :param damage: damage by which health is reduced
         """
+        self._channel.play(self.sound)
         self._health -= damage
         if self._health <= 0:
             self._on_death()
