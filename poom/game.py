@@ -1,7 +1,7 @@
 import os
+import time
 from math import radians
 from pathlib import Path
-import time
 from typing import List
 
 import pygame as pg
@@ -10,7 +10,7 @@ from pygame.event import Event
 from poom.credits import Credits
 from poom.records import Record, update_record
 from poom.settings import ROOT
-from poom.shared import Settings, SceneContext
+from poom.shared import SceneContext, Settings
 
 pg.mixer.init()  # noqa
 

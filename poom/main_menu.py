@@ -1,4 +1,3 @@
-from os import getcwd
 from pathlib import Path
 from typing import Final
 
@@ -14,11 +13,10 @@ from pygame_gui.elements import (
 )
 
 import poom.game as game
-from poom.records import load_record
-from poom.settings import ROOT
 import poom.shared as shared
 from poom.animated import Animation
-
+from poom.records import load_record
+from poom.settings import ROOT
 
 settings = shared.Settings(ROOT)
 
@@ -77,8 +75,7 @@ class Zombie(pg.sprite.Sprite, metaclass=shared.Singleton):
 class WelcomeScene(shared.AbstractScene):
     sound_path: Final[Path] = ROOT / "assets" / "sounds" / "main_menu.mp3"
     sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
-    channel: Final[pg.mixer.Channel] = pg.mixer.Channel(0)
-    channel.play(sound)
+    channel: Final[pg.mixer.Channel] = pg.mixer.Channel(4)
 
     def __init__(self, context: shared.SceneContext) -> None:
         super().__init__(context)
@@ -118,6 +115,8 @@ class WelcomeScene(shared.AbstractScene):
             "Quit",
             self.manager,
         )
+        if not self.channel.get_busy():
+            self.channel.play(self.sound)
 
     def on_event(self, events) -> None:
         for event in events:
