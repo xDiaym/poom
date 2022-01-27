@@ -122,13 +122,13 @@ class WelcomeScene(shared.AbstractScene):
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.play:
                     self.channel.stop()
-                    self._context.scene = game.GameScene(self._context)
+                    self._context.scene = game.LevelScene(self._context)
                 if event.ui_element == self.settings:
                     self._context.scene = SettingsScene(self._context)
                 if event.ui_element == self.statistics:
                     self._context.scene = StatiscticsScene(self._context)
                 if event.ui_element == self.quit:
-                    print("quit")
+                    print("TODO")
             self.manager.process_events(event)
 
     def render(self) -> None:

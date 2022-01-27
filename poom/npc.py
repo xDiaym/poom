@@ -25,7 +25,7 @@ Coords = Tuple[int, int]
 class Enemy(Pawn, Renderable):
     """Enemy is an aggressive to player entity."""
 
-    max_health: Final[float] = 100
+    max_health: Final[float] = 15
     sound_path: Final[Path] = root / "assets" / "sounds" / "bot_injured.mp3"
     sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
