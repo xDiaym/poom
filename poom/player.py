@@ -7,11 +7,13 @@ import pygame as pg
 from numpy.typing import NDArray
 from pygame.math import Vector2
 
+import poom.shared as shared
 from poom.entities import Pawn, WithHealth
 from poom.gun import AnimatedGun
 from poom.settings import ROOT
 
 OnDeathCallback = Callable[[], None]
+settings = shared.Settings.load(ROOT)
 
 
 class Player(Pawn, WithHealth):
@@ -40,6 +42,7 @@ class Player(Pawn, WithHealth):
         self._enemies = enemies
         self._on_death: OnDeathCallback = lambda: None
         self._channel = pg.mixer.Channel(1)
+        self._channel.set_volume(settings.volume / 100)
 
     def on_death(self, cb: OnDeathCallback) -> None:
         """Set callback for death event."""

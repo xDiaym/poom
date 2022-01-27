@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass
-from datetime import timedelta
 from pathlib import Path
 from typing import Any, Optional
 
@@ -35,8 +34,8 @@ def load_record(path: Path) -> Optional[Record]:
     with open(path, "r") as fp:
         raw_record = json.load(fp)
     return Record(
-        game_time=float(raw_record["game_time"]),
-        health=float(raw_record["health"]),
+        game_time=raw_record["game_time"],
+        health=raw_record["health"],
     )
 
 

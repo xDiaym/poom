@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from math import atan2
-from os import getcwd
 from pathlib import Path
 from random import random
 from typing import Any, Final, List, Tuple
@@ -11,22 +10,23 @@ from numpy.typing import NDArray
 from pathfinding.core.grid import Grid
 from pathfinding.finder.best_first import BestFirst
 
+import poom.shared as shared
 from poom.animated import Animation
 from poom.entities import Entity, Pawn, Renderable
 from poom.gun import Gun
 from poom.level import map2d
+from poom.settings import ROOT
 from poom.viewer import Viewer
 
-root = Path(getcwd())
-
 Coords = Tuple[int, int]
+settings = shared.Settings.load(ROOT)
 
 
 class Enemy(Pawn, Renderable):
     """Enemy is an aggressive to player entity."""
 
     max_health: Final[float] = 15
-    sound_path: Final[Path] = root / "assets" / "sounds" / "bot_injured.mp3"
+    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "bot_injured.mp3"
     sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(
@@ -46,6 +46,7 @@ class Enemy(Pawn, Renderable):
         self._gun = Gun(map_, 1, 100)
         self._enemies = entities
         self.channel = pg.mixer.Channel(3)
+        self.channel.set_volume(settings.volume / 100)
 
     @property
     def texture(self) -> pg.Surface:
@@ -121,7 +122,7 @@ class Chase(AbstractAIState):
     ) -> None:
         super().__init__(context)
         self._animation = Animation.from_dir(
-            root / "assets" / "sprites" / "front_walk", 1, 1
+            ROOT / "assets" / "sprites" / "front_walk", 1, 1
         )
 
         self._enemy = enemy
@@ -198,14 +199,19 @@ class Chase(AbstractAIState):
 
 
 class Attack(AbstractAIState):
-    hit_chance: Final[float] = 0.1
-    sound_path: Final[Path] = root / "assets" / "sounds" / "bot_fire.mp3"
+    if settings.difficulty == "Low":
+        hit_chance: float = 0.1
+    elif settings.difficulty == "Medium":
+        hit_chance: float = 0.3
+    else:
+        hit_chance: float = 0.5
+    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "bot_fire.mp3"
     sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(self, context: EnemyIntelligence) -> None:
         super().__init__(context)
         self._animation = Animation.from_dir(
-            root / "assets" / "sprites" / "front_attack", 0.7, 1
+            ROOT / "assets" / "sprites" / "front_attack", 0.7, 1
         )
         owner = self._context.owner
         direction = owner.position - context._enemy.position
@@ -213,6 +219,7 @@ class Attack(AbstractAIState):
         if random() < self.hit_chance:
             owner._gun.shoot(owner.position, angle, [context._enemy])
         channel = pg.mixer.Channel(0)
+        channel.set_volume(settings.volume / 100)
         channel.play(self.sound)
 
     def update(self, dt: float) -> None:
@@ -228,13 +235,14 @@ class Attack(AbstractAIState):
 
 
 class Die(AbstractAIState):
-    sound_path: Final[Path] = root / "assets" / "sounds" / "bot_death.mp3"
+    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "bot_death.mp3"
     sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(self, context: EnemyIntelligence) -> None:
         super().__init__(context)
-        self._animation = Animation.from_dir(root / "assets" / "sprites" / "die", 2, 1)
+        self._animation = Animation.from_dir(ROOT / "assets" / "sprites" / "die", 2, 1)
         channel = pg.mixer.Channel(0)
+        channel.set_volume(settings.volume / 100)
         channel.play(self.sound)
 
     def update(self, dt: float) -> None:

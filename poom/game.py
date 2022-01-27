@@ -1,7 +1,5 @@
-import os
 import time
 from math import radians
-from pathlib import Path
 from typing import List
 
 import pygame as pg
@@ -31,21 +29,21 @@ from poom.main_menu import WelcomeScene
 from poom.npc import Enemy
 from poom.player import Player
 
-root = Path(os.getcwd())
 clock = pg.time.Clock()
+settings = Settings.load(ROOT)
 
 
 class LevelScene(shared.AbstractScene):
     def __init__(self, context: shared.SceneContext) -> None:
         super().__init__(context)
-        level = Level.from_dir(root / "assets" / "levels" / "1")
+        level = Level.from_dir(ROOT / "assets" / "levels" / "1")
         self.map_ = level.map_
 
         animated_gun = create_animated_gun(
             self.map_,
             2,
             25,
-            root / "assets" / "sprites" / "gun",
+            ROOT / "assets" / "sprites" / "gun",
             2,
         )
         self._start_time = time.time()
@@ -61,7 +59,7 @@ class LevelScene(shared.AbstractScene):
         self._player.on_death(self._on_lose)
 
         enemy_texture = pg.image.load(
-            root / "assets" / "sprites" / "front_attack" / "0.png"
+            ROOT / "assets" / "sprites" / "front_attack" / "0.png"
         )
         for position in level.enemies_positions:
             enemy = Enemy(
@@ -77,16 +75,17 @@ class LevelScene(shared.AbstractScene):
 
         self._renderers = [
             BackgroundRenderer(
-                pg.image.load(root / "assets" / "textures" / "skybox.png"),
+                pg.image.load(ROOT / "assets" / "textures" / "skybox.png"),
                 self.map_.shape[0],
             ),
             WallRenderer(self.map_, self._player),
             EntityRenderer(self._enemies),
             CrosshairRenderer(),
-            FPSRenderer(clock),
             GunRenderer(animated_gun),
             HUDRenderer(self._player),
         ]
+        if settings.fps_tick:
+            self._renderers.append(FPSRenderer(clock))
         self._pipeline = Pipeline(self._player, self._renderers)
 
     def on_event(self, events: List[Event]) -> None:
@@ -120,8 +119,7 @@ class Game:
     def __init__(self) -> None:
         self._init()
         self._run = True
-        self._settings = Settings(ROOT)
-        self._screen = pg.display.set_mode(self._settings.screen_size, vsync=1)
+        self._screen = pg.display.set_mode(settings.screen_size, vsync=1)
 
     def stop(self) -> None:
         self._run = False
@@ -129,8 +127,6 @@ class Game:
     def run(self) -> None:
         sc = SceneContext(self._screen, self)
         sc.scene = WelcomeScene(sc)
-        clock = pg.time.Clock()
-        dt: float = 0
 
         while self._run:
             # TODO: event handler
@@ -153,7 +149,6 @@ class Game:
         pg.font.init()
 
     def _deinit(self) -> None:
-        self._settings.update(ROOT)
         pg.quit()
 
 
