@@ -1,16 +1,18 @@
 import os
 from math import radians
 from pathlib import Path
+import time
 from typing import List
 
 import pygame as pg
+
 from poom.credits import Credits
+from poom.records import Record, update_record
+from poom.settings import ROOT
 
 pg.mixer.init()  # noqa
 
-import poom.main_menu as menu
 import poom.shared as shared
-from poom.main_menu import WelcomeScene
 from poom.graphics import (
     BackgroundRenderer,
     CrosshairRenderer,
@@ -23,6 +25,7 @@ from poom.graphics import (
 )
 from poom.gun import create_animated_gun
 from poom.level import Level
+from poom.main_menu import WelcomeScene
 from poom.npc import Enemy
 from poom.player import Player
 
@@ -37,9 +40,13 @@ class LevelScene(shared.AbstractScene):
         self.map_ = level.map_
 
         animated_gun = create_animated_gun(
-            self.map_, 2, 25, root / "assets" / "sprites" / "gun", 2,
+            self.map_,
+            2,
+            25,
+            root / "assets" / "sprites" / "gun",
+            2,
         )
-
+        self._start_time = time.time()
         self._enemies: List[Enemy] = []
         self._player = Player(
             map_=self.map_,
@@ -49,7 +56,7 @@ class LevelScene(shared.AbstractScene):
             fov=radians(90),
             enemies=self._enemies,
         )
-        self._player.on_death(self._load_welcome_scene)
+        self._player.on_death(self._on_lose)
 
         enemy_texture = pg.image.load(
             root / "assets" / "sprites" / "front_attack" / "0.png"
@@ -88,14 +95,23 @@ class LevelScene(shared.AbstractScene):
 
     def update(self, dt: float) -> None:
         if len(self._enemies) == 0:
-            self._context.scene = Credits(self._context)
+            self._on_win()
 
         self._player.update(dt)
         for npc in self._enemies:
             npc.update(dt)
 
-    def _load_welcome_scene(self) -> None:
+    def _on_lose(self) -> None:
         self._context.scene = WelcomeScene(self._context)
+
+    def _on_win(self) -> None:
+        record = Record(
+            game_time=time.time() - self._start_time,
+            health=self._player.get_health(),
+        )
+        update_record(ROOT / "assets" / "records.json", record)
+
+        self._context.scene = Credits(self._context)
 
 
 def game_loop() -> None:

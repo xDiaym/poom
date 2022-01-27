@@ -18,3 +18,6 @@ build/
 .coverage
 coverage.xml
 **.html
+
+# Game statistic files
+assets/records.json

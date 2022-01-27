@@ -14,11 +14,13 @@ from pygame_gui.elements import (
 )
 
 import poom.game as game
+from poom.records import load_record
+from poom.settings import ROOT
 import poom.shared as shared
 from poom.animated import Animation
 
-root = Path(getcwd())
-settings = shared.Settings(root)
+
+settings = shared.Settings(ROOT)
 
 
 def clamp(low: int, high: int, value: float):
@@ -32,10 +34,10 @@ class Zombie(pg.sprite.Sprite, metaclass=shared.Singleton):
         self.screen = screen
         self.v = 30
         self.walking_animation = Animation.from_dir(
-            root / "assets" / "sprites" / "side_walk" / "walk", 0.75, 0.1875
+            ROOT / "assets" / "sprites" / "side_walk" / "walk", 0.75, 0.1875
         )
         self.rotation_animation = Animation.from_dir(
-            root / "assets" / "sprites" / "side_walk" / "rotate", 0.75, 0.1875
+            ROOT / "assets" / "sprites" / "side_walk" / "rotate", 0.75, 0.1875
         )
         self.image = self.walking_animation.current_frame
         self.rect = self.image.get_rect()
@@ -73,7 +75,7 @@ class Zombie(pg.sprite.Sprite, metaclass=shared.Singleton):
 
 
 class WelcomeScene(shared.AbstractScene):
-    sound_path: Final[Path] = root / "assets" / "sounds" / "main_menu.mp3"
+    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "main_menu.mp3"
     sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
     channel: Final[pg.mixer.Channel] = pg.mixer.Channel(0)
     channel.play(sound)
@@ -82,12 +84,12 @@ class WelcomeScene(shared.AbstractScene):
         super().__init__(context)
         self.screen = self._context.screen
         self.manager = pygame_gui.UIManager(
-            self.screen.get_size(), root / "assets" / "style.json"
+            self.screen.get_size(), ROOT / "assets" / "style.json"
         )
         self.zombie = Zombie(self.screen)
         width, height = self.screen.get_width(), self.screen.get_height()
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "textures" / "back.png").convert_alpha(),
+            pg.image.load(ROOT / "assets" / "textures" / "back.png").convert_alpha(),
             (width, height),
         )
         self.poom_label = UILabel(
@@ -147,12 +149,12 @@ class SettingsScene(shared.AbstractScene):
         super().__init__(context)
         self.screen = self._context.screen
         self.manager = pygame_gui.UIManager(
-            self.screen.get_size(), root / "assets" / "style.json"
+            self.screen.get_size(), ROOT / "assets" / "style.json"
         )
         self.zombie = Zombie(self.screen)
         width, height = self.screen.get_width(), self.screen.get_height()
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "textures" / "back.png").convert_alpha(),
+            pg.image.load(ROOT / "assets" / "textures" / "back.png").convert_alpha(),
             (width, height),
         )
         self.settings_label = UILabel(
@@ -266,12 +268,13 @@ class StatiscticsScene(shared.AbstractScene):
         super().__init__(context)
         self.screen = self._context.screen
         self.manager = pygame_gui.UIManager(
-            self.screen.get_size(), root / "assets" / "style.json"
+            self.screen.get_size(),
+            ROOT / "assets" / "style.json",
         )
         self.zombie = Zombie(self.screen)
         width, height = self.screen.get_width(), self.screen.get_height()
         self.background = pg.transform.scale(
-            pg.image.load(root / "assets" / "textures" / "back.png").convert_alpha(),
+            pg.image.load(ROOT / "assets" / "textures" / "back.png").convert_alpha(),
             (width, height),
         )
         self.stats_label = UILabel(
@@ -284,8 +287,18 @@ class StatiscticsScene(shared.AbstractScene):
             "X",
             self.manager,
         )
+
+        record = load_record(ROOT / "assets" / "records.json")
+        info = "Game:<br>"
+        if record:
+            info += (
+                f"    Play time: {round(record.game_time, 2)}s<br>"
+                f"    Remaining health: {record.health}"
+            )
+        else:
+            info += "You haven't played yet."
         self.stats = UITextBox(
-            "1 level:<br>    Kills: 1023<br>    Damage: 800",
+            info,
             pg.Rect(
                 width * 0.2,
                 height * 0.3,
