@@ -1,15 +1,18 @@
 import os
 from math import radians
 from pathlib import Path
+import time
 from typing import List
 
 import pygame as pg
 
+from poom.credits import Credits
+from poom.records import Record, update_record
+from poom.settings import ROOT
+
 pg.mixer.init()  # noqa
 
-import poom.main_menu as menu
 import poom.shared as shared
-from poom.credits import Credits
 from poom.graphics import (
     BackgroundRenderer,
     CrosshairRenderer,
@@ -22,6 +25,7 @@ from poom.graphics import (
 )
 from poom.gun import create_animated_gun
 from poom.level import Level
+from poom.main_menu import WelcomeScene
 from poom.npc import Enemy
 from poom.player import Player
 
@@ -29,26 +33,30 @@ root = Path(os.getcwd())
 clock = pg.time.Clock()
 
 
-class GameScene(shared.AbstractScene):
-    def __init__(self, context=shared.SceneContext):
+class LevelScene(shared.AbstractScene):
+    def __init__(self, context: shared.SceneContext) -> None:
         super().__init__(context)
         level = Level.from_dir(root / "assets" / "levels" / "1")
         self.map_ = level.map_
 
         animated_gun = create_animated_gun(
-            self.map_, 2, 25, root / "assets" / "sprites" / "gun", 2
+            self.map_,
+            2,
+            25,
+            root / "assets" / "sprites" / "gun",
+            2,
         )
-
-        self.enemies = []
-        self.player = Player(
+        self._start_time = time.time()
+        self._enemies: List[Enemy] = []
+        self._player = Player(
             map_=self.map_,
             gun=animated_gun,
             position=pg.Vector2(1.1, 1.1),
             angle=radians(45),
             fov=radians(90),
-            enemies=self.enemies,
+            enemies=self._enemies,
         )
-        self.player.on_death(self._load_title)
+        self._player.on_death(self._on_lose)
 
         enemy_texture = pg.image.load(
             root / "assets" / "sprites" / "front_attack" / "0.png"
@@ -57,40 +65,52 @@ class GameScene(shared.AbstractScene):
             enemy = Enemy(
                 texture=enemy_texture,
                 map_=level.map_,
-                entities=self.enemies,
-                ai_enemy=self.player,
+                entities=self._enemies,
+                ai_enemy=self._player,
                 position=position,
                 angle=radians(45),
                 fov=radians(90),
             )
-            self.enemies.append(enemy)
+            self._enemies.append(enemy)
 
-        self.renderers = [
+        self._renderers = [
             BackgroundRenderer(
                 pg.image.load(root / "assets" / "textures" / "skybox.png"),
                 self.map_.shape[0],
             ),
-            WallRenderer(self.map_, self.player),
-            EntityRenderer(self.enemies),
+            WallRenderer(self.map_, self._player),
+            EntityRenderer(self._enemies),
             CrosshairRenderer(),
             FPSRenderer(clock),
             GunRenderer(animated_gun),
-            HUDRenderer(self.player),
+            HUDRenderer(self._player),
         ]
-        self.pipeline = Pipeline(self.player, self.renderers)
+        self._pipeline = Pipeline(self._player, self._renderers)
 
     def on_event(self, events) -> None:
         pass
 
     def render(self) -> None:
-        self.pipeline.render(self._context.screen)
+        self._pipeline.render(self._context.screen)
 
     def update(self, dt: float) -> None:
-        self.player.update(dt)
-        for npc in self.enemies:
+        if len(self._enemies) == 0:
+            self._on_win()
+
+        self._player.update(dt)
+        for npc in self._enemies:
             npc.update(dt)
 
-    def _load_title(self) -> None:
+    def _on_lose(self) -> None:
+        self._context.scene = WelcomeScene(self._context)
+
+    def _on_win(self) -> None:
+        record = Record(
+            game_time=time.time() - self._start_time,
+            health=self._player.get_health(),
+        )
+        update_record(ROOT / "assets" / "records.json", record)
+
         self._context.scene = Credits(self._context)
 
 
@@ -100,7 +120,8 @@ def game_loop() -> None:
 
     settings = shared.Settings(root)
     screen = pg.display.set_mode(settings.screen_size, vsync=1)
-    sc = shared.SceneContext(menu.WelcomeScene, screen)
+    sc = shared.SceneContext(screen)
+    sc.scene = WelcomeScene(sc)
     clock = pg.time.Clock()
     dt: float = 0
 

@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import Collection, List
+from typing import Collection, List, Optional
 
 import pygame as pg
 from pygame.event import Event
@@ -47,24 +47,28 @@ class AbstractScene(ABC):
 
 
 class SceneContext:
-    def __init__(self, first_scene: AbstractScene, screen: pg.Surface) -> None:
-        self.screen = screen
-        self._scene = first_scene(self)
+    def __init__(self, screen: pg.Surface) -> None:
+        self._screen = screen
+        self._scene: Optional[AbstractScene] = None
+
+    @property
+    def screen(self) -> pg.Surface:
+        return self._screen
 
     @property
     def scene(self) -> AbstractScene:
+        assert self._scene, "Scene can't be None."
         return self._scene
 
     @scene.setter
-    def scene(self, value: AbstractScene) -> None:
-        self._scene = value
+    def scene(self, scene: AbstractScene) -> None:
+        self._scene = scene
 
     def on_event(self, events: List[Event]) -> None:
         self._scene.on_event(events)
 
     def render(self) -> None:
         self._scene.render()
-        pg.display.flip()
 
     def update(self, dt):
         self._scene.update(dt)
