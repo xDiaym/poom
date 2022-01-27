@@ -1,5 +1,6 @@
 from os import getcwd
 from pathlib import Path
+from typing import Final
 
 import pygame as pg
 import pygame_gui
@@ -72,6 +73,11 @@ class Zombie(pg.sprite.Sprite, metaclass=shared.Singleton):
 
 
 class WelcomeScene(shared.AbstractScene):
+    sound_path: Final[Path] = root / "assets" / "sounds" / "main_menu.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
+    channel: Final[pg.mixer.Channel] = pg.mixer.Channel(0)
+    channel.play(sound)
+
     def __init__(self, context: shared.SceneContext) -> None:
         super().__init__(context)
         self.screen = self._context.screen
@@ -115,6 +121,7 @@ class WelcomeScene(shared.AbstractScene):
         for event in events:
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.play:
+                    self.channel.stop()
                     self._context.scene = game.GameScene(self._context)
                 if event.ui_element == self.settings:
                     self._context.scene = SettingsScene(self._context)

@@ -26,6 +26,8 @@ class Enemy(Pawn, Renderable):
     """Enemy is an aggressive to player entity."""
 
     max_health: Final[float] = 100
+    sound_path: Final[Path] = root / "assets" / "sounds" / "bot_injured.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(
         self,
@@ -43,6 +45,7 @@ class Enemy(Pawn, Renderable):
         self._health = self.max_health
         self._gun = Gun(map_, 1, 15)
         self._enemies = entities
+        self.channel = pg.mixer.Channel(3)
 
     @property
     def texture(self) -> pg.Surface:
@@ -56,6 +59,8 @@ class Enemy(Pawn, Renderable):
         self._health -= damage
         if self._health <= 0 and not isinstance(self._intelligence.state, Die):
             self._intelligence.state = Die(self._intelligence)
+        else:
+            self.channel.play(self.sound)
 
     def die(self) -> None:
         self._enemies.remove(self)
@@ -193,7 +198,9 @@ class Chase(AbstractAIState):
 
 
 class Attack(AbstractAIState):
-    hit_chance: Final[float] = 0.33
+    hit_chance: Final[float] = 0.1
+    sound_path: Final[Path] = root / "assets" / "sounds" / "bot_fire.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(self, context: EnemyIntelligence) -> None:
         super().__init__(context)
@@ -205,6 +212,8 @@ class Attack(AbstractAIState):
         angle = atan2(direction.y, direction.x)
         if random() < self.hit_chance:
             owner._gun.shoot(owner.position, angle, [context._enemy])
+        channel = pg.mixer.Channel(0)
+        channel.play(self.sound)
 
     def update(self, dt: float) -> None:
         self._animation.update(dt)
@@ -219,9 +228,14 @@ class Attack(AbstractAIState):
 
 
 class Die(AbstractAIState):
+    sound_path: Final[Path] = root / "assets" / "sounds" / "bot_death.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
+
     def __init__(self, context: EnemyIntelligence) -> None:
         super().__init__(context)
         self._animation = Animation.from_dir(root / "assets" / "sprites" / "die", 2, 1)
+        channel = pg.mixer.Channel(0)
+        channel.play(self.sound)
 
     def update(self, dt: float) -> None:
         self._animation.update(dt)

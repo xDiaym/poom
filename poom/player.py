@@ -1,4 +1,6 @@
 """Describes player."""
+from os import getcwd
+from pathlib import Path
 from typing import Collection, Final, Sequence
 
 import numpy as np
@@ -9,6 +11,8 @@ from pygame.math import Vector2
 from poom.entities import Pawn, WithHealth
 from poom.gun import AnimatedGun
 
+root = Path(getcwd())
+
 
 class Player(Pawn, WithHealth):
     """Player."""
@@ -16,6 +20,8 @@ class Player(Pawn, WithHealth):
     max_health: Final[float] = 100
     movement_speed: Final[float] = 5
     rotation_speed: Final[float] = 3
+    sound_path: Final[Path] = root / "assets" / "sounds" / "player_injured.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(
         self,
@@ -32,6 +38,7 @@ class Player(Pawn, WithHealth):
         self._map = map_
         self._health = self.max_health
         self._enemies = enemies
+        self.channel = pg.mixer.Channel(1)
 
     @property
     def hitbox_width(self) -> float:
@@ -51,6 +58,7 @@ class Player(Pawn, WithHealth):
 
         :param damage: damage by which health is reduced
         """
+        self.channel.play(self.sound)
         self._health -= damage
         # TODO: process player death.
 

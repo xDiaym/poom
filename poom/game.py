@@ -5,6 +5,8 @@ from typing import List
 
 import pygame as pg
 
+pg.mixer.init()  # noqa
+
 import poom.main_menu as menu
 import poom.shared as shared
 from poom.graphics import (
