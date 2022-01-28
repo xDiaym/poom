@@ -5,14 +5,10 @@ from typing import List
 import pygame as pg
 from pygame.event import Event
 
-from poom.credits import Credits
-from poom.records import Record, update_record
-from poom.settings import ROOT
-from poom.shared import SceneContext, Settings
-
 pg.mixer.init()  # noqa
 
 import poom.shared as shared
+from poom.credits import Credits
 from poom.graphics import (
     BackgroundRenderer,
     CrosshairRenderer,
@@ -28,15 +24,23 @@ from poom.level import Level
 from poom.main_menu import WelcomeScene
 from poom.npc import Enemy
 from poom.player import Player
+from poom.records import Record, update_record
+from poom.settings import ROOT
+from poom.shared import SceneContext, Settings
 
 clock = pg.time.Clock()
 settings = Settings.load(ROOT)
 
 
 class LevelScene(shared.AbstractScene):
+    level = 1
+
     def __init__(self, context: shared.SceneContext) -> None:
         super().__init__(context)
-        level = Level.from_dir(ROOT / "assets" / "levels" / "1")
+        level = Level.from_dir(ROOT / "assets" / "levels" / f"{self.level}")
+        sound = pg.mixer.Sound(ROOT / "assets" / "sounds" / f"level{self.level}.mp3")
+        self.channel = pg.mixer.Channel(5)
+        self.channel.set_volume(settings.volume / 100)
         self.map_ = level.map_
 
         animated_gun = create_animated_gun(
@@ -75,7 +79,7 @@ class LevelScene(shared.AbstractScene):
 
         self._renderers = [
             BackgroundRenderer(
-                pg.image.load(ROOT / "assets" / "textures" / "skybox.png"),
+                pg.image.load(ROOT / "assets" / "textures" / f"skybox{self.level}.png"),
                 self.map_.shape[0],
             ),
             WallRenderer(self.map_, self._player),
@@ -86,6 +90,7 @@ class LevelScene(shared.AbstractScene):
         ]
         if settings.fps_tick:
             self._renderers.append(FPSRenderer(clock))
+        self.channel.play(sound)
         self._pipeline = Pipeline(self._player, self._renderers)
 
     def on_event(self, events: List[Event]) -> None:
@@ -103,16 +108,20 @@ class LevelScene(shared.AbstractScene):
             npc.update(dt)
 
     def _on_lose(self) -> None:
+        self.channel.stop()
         self._context.scene = WelcomeScene(self._context)
 
     def _on_win(self) -> None:
-        record = Record(
-            game_time=time.time() - self._start_time,
-            health=self._player.get_health(),
-        )
-        update_record(ROOT / "assets" / "records.json", record)
-
-        self._context.scene = Credits(self._context)
+        LevelScene.level += 1
+        if LevelScene.level > 3:
+            record = Record(
+                game_time=time.time() - self._start_time,
+                health=self._player.get_health(),
+            )
+            update_record(ROOT / "assets" / "records.json", record)
+            self._context.scene = Credits(self._context)
+        else:
+            self._context.scene = LevelScene(self._context)
 
 
 class Game:
@@ -147,6 +156,9 @@ class Game:
     def _init(self) -> None:
         pg.init()
         pg.font.init()
+        pg.display.set_caption("Poom")
+        icon = pg.image.load(ROOT / "assets" / "textures" / "icon.ico")
+        pg.display.set_icon(icon)
 
     def _deinit(self) -> None:
         pg.quit()

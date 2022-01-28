@@ -7,8 +7,13 @@ import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 
+from poom.settings import ROOT
+from poom.shared import Settings
+
 T = TypeVar("T")
 Map = NDArray[np.int8]
+
+settings = Settings.load(ROOT)
 
 
 def map2d(matrix: List[str], fn: Callable[[str], T]) -> List[List[T]]:

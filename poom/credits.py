@@ -10,7 +10,7 @@ from pygame.font import Font
 from pygame.sprite import Group
 
 from poom.settings import ROOT
-from poom.shared import AbstractScene, SceneContext
+from poom.shared import AbstractScene, SceneContext, Settings
 
 
 def logos_loader(path: Path, scale: float = 1) -> List[pg.Surface]:
@@ -104,8 +104,15 @@ Thanks for playing!
 """
 )
 
+settings = Settings.load(ROOT)
+
 
 class Credits(AbstractScene):
+    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "main_theme.mp3"
+    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
+    channel: Final[pg.mixer.Channel] = pg.mixer.Channel(5)
+    channel.set_volume(settings.volume / 100)
+
     def __init__(self, context: "SceneContext") -> None:
         super().__init__(context)
         screen_size = context.screen.get_size()
@@ -139,6 +146,7 @@ class Credits(AbstractScene):
         )
 
         create_text(TEXT, font, self._group, screen_size[1] + 400, screen_size[0])
+        self.channel.play(self.sound)
 
     def render(self) -> None:
         self._context.screen.blit(self._background, (0, 0))
