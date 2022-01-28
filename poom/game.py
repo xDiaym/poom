@@ -15,17 +15,9 @@ from poom.shared import SceneContext, Settings
 pg.mixer.init()  # noqa
 
 import poom.shared as shared
-from poom.graphics import (
-    BackgroundRenderer,
-    CrosshairRenderer,
-    EntityRenderer,
-    FPSRenderer,
-    GunRenderer,
-    HUDRenderer,
-    Pipeline,
-    WallRenderer,
-)
-from poom.gun import create_animated_gun
+from poom.graphics import (BackgroundRenderer, CrosshairRenderer, EntityRenderer, FPSRenderer, GunRenderer, HUDRenderer,
+                           Pipeline, WallRenderer)
+from poom.gun.player_gun import create_player_gun
 from poom.level import Level
 from poom.main_menu import WelcomeScene
 from poom.npc import Enemy
@@ -41,7 +33,7 @@ class LevelScene(shared.AbstractScene):
         level = Level.from_dir(root / "assets" / "levels" / "1")
         self.map_ = level.map_
 
-        animated_gun = create_animated_gun(
+        player_gun = create_player_gun(
             self.map_,
             2,
             25,
@@ -52,7 +44,7 @@ class LevelScene(shared.AbstractScene):
         self._enemies: List[Enemy] = []
         self._player = Player(
             map_=self.map_,
-            gun=animated_gun,
+            gun=player_gun,
             position=pg.Vector2(1.1, 1.1),
             angle=radians(45),
             fov=radians(90),
@@ -84,7 +76,7 @@ class LevelScene(shared.AbstractScene):
             EntityRenderer(self._enemies),
             CrosshairRenderer(),
             FPSRenderer(clock),
-            GunRenderer(animated_gun),
+            GunRenderer(player_gun),
             HUDRenderer(self._player),
         ]
         self._pipeline = Pipeline(self._player, self._renderers)

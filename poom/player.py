@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from pygame.math import Vector2
 
 from poom.entities import Pawn, WithHealth
-from poom.gun import AnimatedGun
+from poom.gun.player_gun import PlayerGun
 from poom.settings import ROOT
 
 OnDeathCallback = Callable[[], None]
@@ -27,7 +27,7 @@ class Player(Pawn, WithHealth):
         self,
         *,
         map_: NDArray[np.int8],
-        gun: AnimatedGun,
+        gun: PlayerGun,
         position: Vector2,
         angle: float,
         fov: float,
