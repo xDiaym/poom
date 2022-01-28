@@ -2,7 +2,6 @@
 import os
 from abc import ABC, abstractmethod
 from math import degrees
-from pathlib import Path
 from typing import Any, Collection, Final, Optional, Tuple, Union
 
 import numpy as np
@@ -120,9 +119,6 @@ class FPSRenderer(AbstractRenderer):
         fps_string = "{0:.0f}".format(fps)
         fps_image = self._font.render(fps_string, True, color)  # noqa: WPS425
         surface.blit(fps_image, self._position)
-
-
-root = Path(os.getcwd())
 
 
 class HUDRenderer(AbstractRenderer):

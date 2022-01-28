@@ -1,5 +1,4 @@
 import operator
-from dataclasses import dataclass
 from os import listdir
 from pathlib import Path
 from textwrap import dedent
@@ -111,11 +110,11 @@ class Credits(AbstractScene):
         super().__init__(context)
         screen_size = context.screen.get_size()
         self._group = Group()
-        self._bacground = pg.image.load(
+        self._background = pg.image.load(
             ROOT / "assets" / "textures" / "back.png",
         )
-        self._bacground = pg.transform.scale(
-            self._bacground,
+        self._background = pg.transform.scale(
+            self._background,
             screen_size,
         )
         # TODO: make x autoincrement
@@ -142,7 +141,7 @@ class Credits(AbstractScene):
         create_text(TEXT, font, self._group, screen_size[1] + 400, screen_size[0])
 
     def render(self) -> None:
-        self._context.screen.blit(self._bacground, (0, 0))
+        self._context.screen.blit(self._background, (0, 0))
         self._group.draw(self._context.screen)
         pg.display.flip()
 

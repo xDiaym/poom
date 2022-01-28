@@ -1,5 +1,7 @@
 import json
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING, Collection, List, Optional
 
 if TYPE_CHECKING:
@@ -20,14 +22,27 @@ class Singleton(type):
 
 
 # TODO: move to file
-class Settings(dict, metaclass=Singleton):
-    def __init__(self, root):
+@dataclass
+class Settings(metaclass=Singleton):
+    difficulty: float
+    screen_size: List[int]
+    ratio: str
+    volume: int
+    fps_tick: int
+
+    @staticmethod
+    def load(root: Path):
         with open(root / "assets" / "settings.json") as file:
             data = json.load(file)
-        for key in data:
-            setattr(self, key, data[key])
+        return Settings(
+            data["difficulty"],
+            data["screen_size"],
+            data["ratio"],
+            data["volume"],
+            data["fps_tick"],
+        )
 
-    def update(self, root):
+    def update(self, root: Path):
         with open(root / "assets" / "settings.json", "w") as file:
             json.dump(vars(self), file)
 

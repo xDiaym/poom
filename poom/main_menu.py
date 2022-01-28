@@ -18,7 +18,7 @@ from poom.animated import Animation
 from poom.records import load_record
 from poom.settings import ROOT
 
-settings = shared.Settings(ROOT)
+settings = shared.Settings.load(ROOT)
 
 
 def clamp(low: int, high: int, value: float):
@@ -76,6 +76,7 @@ class WelcomeScene(shared.AbstractScene):
     sound_path: Final[Path] = ROOT / "assets" / "sounds" / "main_menu.mp3"
     sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
     channel: Final[pg.mixer.Channel] = pg.mixer.Channel(4)
+    channel.set_volume(settings.volume / 100)
 
     def __init__(self, context: shared.SceneContext) -> None:
         super().__init__(context)
@@ -107,7 +108,7 @@ class WelcomeScene(shared.AbstractScene):
         )
         self.statistics = UIButton(
             pg.Rect((width - 160) // 2, height * 0.5, 160, 70),
-            "Statistics",
+            "Records",
             self.manager,
         )
         self.quit = UIButton(
@@ -127,7 +128,7 @@ class WelcomeScene(shared.AbstractScene):
                 if event.ui_element == self.settings:
                     self._context.scene = SettingsScene(self._context)
                 if event.ui_element == self.statistics:
-                    self._context.scene = StatiscticsScene(self._context)
+                    self._context.scene = RecordsScene(self._context)
                 if event.ui_element == self.quit:
                     self._context.game.stop()
             self.manager.process_events(event)
@@ -166,15 +167,15 @@ class SettingsScene(shared.AbstractScene):
             "X",
             self.manager,
         )
-        self.graphics_lbl = UILabel(
-            pg.Rect((width - 200) // 2, height * 0.23, 100, 50),
-            "Quality:",
+        self.difficulty_lbl = UILabel(
+            pg.Rect((width - 200) // 2, height * 0.23, 140, 50),
+            "Difficulty:",
             self.manager,
             object_id=ObjectID(object_id="#sublabel"),
         )
-        self.graphics = UIDropDownMenu(
+        self.difficulty = UIDropDownMenu(
             ["Low", "Medium", "High"],
-            settings.quality,
+            settings.difficulty,
             pg.Rect((width - 200) // 2, height * 0.23 + 40, 200, 50),
             self.manager,
         )
@@ -186,7 +187,7 @@ class SettingsScene(shared.AbstractScene):
         )
         self.screen_size = UIDropDownMenu(
             ["800x600 (4:3)", "1024x768 (4:3)", "1280x720 (16:9)"],
-            f"{width}x{height} ({settings.ratio})",
+            f"{settings.screen_size[0]}x{settings.screen_size[1]} ({settings.ratio})",
             pg.Rect((width - 200) // 2, height * 0.4 + 40, 290, 50),
             self.manager,
         )
@@ -233,22 +234,23 @@ class SettingsScene(shared.AbstractScene):
                     f"{int(self.volume.current_value * 100)} %"
                 )
                 settings.volume = int(self.volume.current_value * 100)
+                settings.update(ROOT)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.back:
                     self._context.scene = WelcomeScene(self._context)
             if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-                if event.ui_element == self.graphics:
-                    settings.quality = self.graphics.selected_option
+                if event.ui_element == self.difficulty:
+                    settings.difficulty = self.difficulty.selected_option
                 if event.ui_element == self.screen_size:
                     new_size, ratio = self.screen_size.selected_option.split()
                     width, height = map(int, new_size.split("x"))
                     settings.screen_size = [width, height]
                     settings.ratio = ratio[1:-1]
-                    self._context.scene = SettingsScene(self._context)
                 if event.ui_element == self.fps:
                     settings.fps_tick = (
                         True if self.fps.selected_option == "on" else False
                     )
+                settings.update(ROOT)
             self.manager.process_events(event)
 
     def render(self) -> None:
@@ -262,7 +264,7 @@ class SettingsScene(shared.AbstractScene):
         self.manager.update(0)
 
 
-class StatiscticsScene(shared.AbstractScene):
+class RecordsScene(shared.AbstractScene):
     def __init__(self, context: shared.SceneContext) -> None:
         super().__init__(context)
         self.screen = self._context.screen
@@ -278,7 +280,7 @@ class StatiscticsScene(shared.AbstractScene):
         )
         self.stats_label = UILabel(
             pg.Rect((width - 230) // 2, height * 0.05, 230, 80),
-            "Statistics",
+            "Records",
             self.manager,
         )
         self.back = UIButton(
