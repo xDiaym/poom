@@ -2,13 +2,12 @@ from pathlib import Path
 from typing import Collection, Final
 
 import pygame as pg
-from poom.animated import Animation
 
+from poom.animated import Animation
 from poom.entities import Pawn, Renderable
 from poom.gun.gun import Gun
 from poom.level import Map
 from poom.settings import ROOT
-
 
 
 class PlayerGun(Renderable):

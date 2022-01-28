@@ -44,7 +44,7 @@ class Enemy(Pawn, Renderable):
         self._intelligence = EnemyIntelligence(self, ai_enemy, ai_map)
         self._texture = texture
         self._health = self.max_health
-        self._gun = Gun(map_, 1, 100)
+        self._gun = Gun(map_, 1, 20)
         self._enemies = entities
         self.channel = pg.mixer.Channel(3)
         self.channel.set_volume(settings.volume / 100)
@@ -241,14 +241,14 @@ class Attack(AbstractAIState):
 
     def _rotate_to_enemy(self) -> None:
         owner = self._context.owner
-        direction = (owner.position - self._context._enemy.position)
+        direction = owner.position - self._context._enemy.position
         owner._angle = atan2(direction.y, direction.x)
 
     def _shoot(self) -> None:
         channel = pg.mixer.Channel(0)
         channel.set_volume(1)
         channel.play(self.sound)
-        
+
         owner = self._context.owner
         if random() < self.hit_chance:
             owner._gun.shoot(owner.position, owner.angle, [self._context._enemy])

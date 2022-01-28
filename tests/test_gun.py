@@ -1,30 +1,36 @@
 import numpy as np
 import pygame as pg
 import pytest
-from poom.entities import Pawn
 
+from poom.entities import Pawn
 from poom.gun.gun import Gun
 from poom.level import Map
 
 
 @pytest.fixture
 def clear_map() -> Map:
-    return np.array([
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-    ], dtype=np.int8)
+    return np.array(
+        [
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+        ],
+        dtype=np.int8,
+    )
 
 
 @pytest.fixture
 def wall_map() -> Map:
-    return np.array([
-        [1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 1],
-        [1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-    ], dtype=np.int8)
+    return np.array(
+        [
+            [1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1],
+            [1, 1, 1, 1, 1],
+        ],
+        dtype=np.int8,
+    )
 
 
 class MockedPawn(Pawn):

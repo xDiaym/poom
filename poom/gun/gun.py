@@ -6,8 +6,8 @@ import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 from pygame.math import Vector2
-from poom.entities import Pawn
 
+from poom.entities import Pawn
 from poom.pooma.ray_march import shoot
 from poom.settings import ROOT
 

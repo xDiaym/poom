@@ -2,7 +2,8 @@
 import os
 from abc import ABC, abstractmethod
 from math import degrees
-from typing import Any, Collection, Final, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Collection, Final, List, Optional, Tuple, Union
 
 import numpy as np
 import pygame as pg
@@ -11,7 +12,8 @@ from numpy.typing import NDArray
 from poom.entities import Entity, WithHealth
 from poom.gun.player_gun import PlayerGun
 from poom.level import Map
-from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint:disable=E0611
+from poom.pooma.ray_march import draw_sprite, draw_walls
+from poom.settings import ROOT  # pylint:disable=E0611
 from poom.viewer import Viewer
 
 StencilBuffer = NDArray[np.float32]
@@ -222,11 +224,7 @@ class WallRenderer(AbstractRenderer):
         """
         self._map = map_
         self._viewer = viewer  # ??? maybe use RenderContext?
-
-        # FIXME: Use image loader instead of this garbage
-        path1 = os.path.abspath("./assets/textures/1.png")
-        path2 = os.path.abspath("./assets/textures/2.png")
-        self._textures = [pg.image.load(path1), pg.image.load(path2)]
+        self._textures = self._load_textures(ROOT / "assets" / "textures" / "walls")
 
     def __call__(
         self,
@@ -243,6 +241,21 @@ class WallRenderer(AbstractRenderer):
             self._viewer.angle,
             self._viewer.fov,
         )
+
+    def _load_textures(
+        self,
+        root: Path,
+    ) -> List[pg.Surface]:
+        filenames = sorted(
+            os.listdir(root),
+            key=lambda filename: int(Path(filename).stem),
+        )
+        images = []
+        for name in filenames:
+            source = pg.image.load(root / name).convert_alpha()
+            images.append(source)
+
+        return images
 
 
 def _render_single(
