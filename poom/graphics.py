@@ -9,7 +9,7 @@ import pygame as pg
 from numpy.typing import NDArray
 
 from poom.entities import Entity, WithHealth
-from poom.gun import AnimatedGun
+from poom.gun.player_gun import PlayerGun
 from poom.level import Map
 from poom.pooma.ray_march import draw_sprite, draw_walls  # pylint:disable=E0611
 from poom.viewer import Viewer
@@ -320,7 +320,7 @@ class Pipeline:
 
 
 class GunRenderer(AbstractRenderer):
-    def __init__(self, gun: AnimatedGun) -> None:
+    def __init__(self, gun: PlayerGun) -> None:
         self._gun = gun
 
     def __call__(

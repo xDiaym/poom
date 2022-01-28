@@ -1,20 +1,15 @@
-"""Gun and animated gun. Used for attacking."""
+"""Gun and his interface."""
 from math import cos, radians, sin
-from pathlib import Path
-from typing import Collection, Final
+from typing import Collection
 
 import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 from pygame.math import Vector2
+from poom.entities import Pawn
 
-import poom.shared as shared
-from poom.animated import Animation
-from poom.entities import Pawn, Renderable
 from poom.pooma.ray_march import shoot
 from poom.settings import ROOT
-
-settings = shared.Settings.load(ROOT)
 
 
 def vec_point_distance(
@@ -64,6 +59,25 @@ class Gun:
         """Return true on reloading."""
         return self._elapsed_time < self._delay
 
+    def can_cause_damage(
+        self,
+        position: pg.Vector2,
+        angle: float,
+        enemy: Pawn,
+    ) -> bool:
+        if not self.can_shoot:
+            return False
+
+        wall_distance = shoot(self._map, position.x, position.y, angle)
+        view = Vector2(cos(angle), sin(angle))
+
+        if wall_distance < (enemy.position - position).magnitude():
+            # If enemy is behind wall
+            return False
+
+        distance = vec_point_distance(position, view, enemy.position)
+        return abs(distance) < enemy.hitbox_width
+
     def shoot(
         self,
         position: Vector2,
@@ -79,7 +93,7 @@ class Gun:
         if not self.can_shoot:
             return
 
-        wall_distance = shoot(self._map, *position, angle)
+        wall_distance = shoot(self._map, position.x, position.y, angle)
         view = Vector2(cos(angle), sin(angle))
 
         for enemy in enemies:
@@ -98,68 +112,3 @@ class Gun:
         :param dt: delta time
         """
         self._elapsed_time += dt
-
-
-class AnimatedGun(Renderable):
-    """Gun with texture and reload animation.
-
-    Used as player gun.
-    """
-
-    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "player_ssg.mp3"
-    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
-
-    def __init__(self, gun: Gun, animation: Animation) -> None:
-        """Initialize animated gun.
-
-        :param gun: gun instance
-        :param animation: gun animation
-        """
-        self._gun = gun
-        self._animation = animation
-        self.channel = pg.mixer.Channel(2)
-        self.channel.set_volume(settings.volume / 100)
-
-    def shoot(
-        self,
-        position: Vector2,
-        angle: float,
-        enemies: Collection["Pawn"],
-    ) -> None:
-        """Shoot to enemies.
-
-        :param position: shooter position
-        :param angle: shooter angle
-        :param enemies: enemies
-        """
-        if not self.channel.get_busy():
-            self.channel.play(self.sound)
-        self._gun.shoot(position, angle, enemies)
-
-    @property
-    def texture(self) -> pg.Surface:
-        """Return gun texture."""
-        return self._animation.current_frame
-
-    def update(self, dt: float) -> None:
-        """Update gun texture.
-
-        :param dt: delta time
-        """
-        self._gun.update(dt)
-        if self._gun.reloading:
-            self._animation.update(dt)
-        else:
-            self._animation.reset()
-
-
-def create_animated_gun(
-    level_map: NDArray[np.int8],
-    reload_time: float,
-    damage: float,
-    animation_path: Path,
-    scale: float,
-) -> AnimatedGun:
-    gun = Gun(level_map, reload_time, damage)
-    animation = Animation.from_dir(animation_path, reload_time, scale)
-    return AnimatedGun(gun, animation)

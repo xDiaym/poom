@@ -13,7 +13,7 @@ from pathfinding.finder.best_first import BestFirst
 import poom.shared as shared
 from poom.animated import Animation
 from poom.entities import Entity, Pawn, Renderable
-from poom.gun import Gun
+from poom.gun.gun import Gun
 from poom.level import map2d
 from poom.settings import ROOT
 from poom.viewer import Viewer
@@ -40,6 +40,7 @@ class Enemy(Pawn, Renderable):
     ) -> None:
         super().__init__(*args, **kwargs)
         ai_map = map2d(map_, lambda x: 1 if x == 0 else 0)
+        self._ai_enemy = ai_enemy
         self._intelligence = EnemyIntelligence(self, ai_enemy, ai_map)
         self._texture = texture
         self._health = self.max_health
@@ -55,6 +56,9 @@ class Enemy(Pawn, Renderable):
     def update(self, dt: float) -> None:
         self._intelligence.update(dt)
         self._gun.update(dt)
+
+    def can_cause_damage(self) -> bool:
+        return self._gun.can_cause_damage(self.position, self.angle, self._ai_enemy)
 
     def take_damage(self, damage: float) -> None:
         self._health -= damage
@@ -213,14 +217,16 @@ class Attack(AbstractAIState):
         self._animation = Animation.from_dir(
             ROOT / "assets" / "sprites" / "front_attack", 0.7, 1
         )
-        owner = self._context.owner
-        direction = owner.position - context._enemy.position
-        angle = atan2(direction.y, direction.x)
-        if random() < self.hit_chance:
-            owner._gun.shoot(owner.position, angle, [context._enemy])
-        channel = pg.mixer.Channel(0)
-        channel.set_volume(settings.volume / 100)
-        channel.play(self.sound)
+        self._rotate_to_enemy()
+        owner = context.owner
+        if owner.can_cause_damage():
+            self._shoot()
+        else:
+            context.state = Chase(
+                self._context,
+                self._context._enemy,
+                self._context._map,
+            )
 
     def update(self, dt: float) -> None:
         self._animation.update(dt)
@@ -232,6 +238,20 @@ class Attack(AbstractAIState):
                 self._context._map,
             )
             self._context.state = state
+
+    def _rotate_to_enemy(self) -> None:
+        owner = self._context.owner
+        direction = (owner.position - self._context._enemy.position)
+        owner._angle = atan2(direction.y, direction.x)
+
+    def _shoot(self) -> None:
+        channel = pg.mixer.Channel(0)
+        channel.set_volume(1)
+        channel.play(self.sound)
+        
+        owner = self._context.owner
+        if random() < self.hit_chance:
+            owner._gun.shoot(owner.position, owner.angle, [self._context._enemy])
 
 
 class Die(AbstractAIState):
