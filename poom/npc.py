@@ -241,7 +241,7 @@ class Attack(AbstractAIState):
 
     def _rotate_to_enemy(self) -> None:
         owner = self._context.owner
-        direction = owner.position - self._context._enemy.position
+        direction = self._context._enemy.position - owner.position
         owner._angle = atan2(direction.y, direction.x)
 
     def _shoot(self) -> None:
