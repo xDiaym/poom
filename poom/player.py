@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from pygame.math import Vector2
 
 import poom.shared as shared
-from poom.entities import Pawn, WithHealth
+from poom.entities import Damagable, Pawn
 from poom.gun.player_gun import PlayerGun
 from poom.settings import ROOT
 
@@ -16,7 +16,7 @@ OnDeathCallback = Callable[[], None]
 settings = shared.Settings.load(ROOT)
 
 
-class Player(Pawn, WithHealth):
+class Player(Pawn, Damagable):
     """Player."""
 
     max_health: Final[float] = 100

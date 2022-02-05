@@ -29,6 +29,14 @@ class Damagable(ABC):
     def hitbox_width(self) -> float:
         """Return hitbox width."""
 
+    @abstractmethod
+    def get_health(self) -> float:
+        """Return current health."""
+
+    @abstractmethod
+    def get_health_ratio(self) -> float:
+        """Return ration between current health and max health."""
+
 
 class Entity(ABC, Viewer):
     """Base entity.
@@ -48,13 +56,3 @@ class Entity(ABC, Viewer):
 
 class Pawn(Entity, Damagable, ABC):
     """Entity with health."""
-
-
-class WithHealth(ABC):
-    @abstractmethod
-    def get_health(self) -> float:
-        """Return current health."""
-
-    @abstractmethod
-    def get_health_ratio(self) -> float:
-        """Return ration between current health and max health."""
