@@ -8,15 +8,20 @@ from pathfinding.finder.best_first import BestFirst
 
 from poom.ai.intelligent import AbstractIntelligent, Path, Point
 from poom.resources import R
+from poom.settings import ROOT
+from poom.shared import Settings
+
+settings = Settings.load(ROOT)
 
 
 class AbstractAction(ABC):
-    def update(self, owner: AbstractIntelligent) -> None:
-        """ "Apply cation to owner."""
-
     @abstractmethod
     def apply(self) -> None:
         """Initialize settings."""
+
+    @abstractmethod
+    def update(self, dt: float) -> None:
+        """Apply action to owner."""
 
     @property
     @abstractmethod
@@ -32,15 +37,20 @@ class AttackAction(AbstractAction):
     ) -> None:
         self._owner = owner
         self._enemy_position = enemy_position
+        self._channel = pg.mixer.Channel(1)
+        self._channel.set_volume(settings.volume / 100)
 
     def apply(self) -> None:
-        self._owner.set_animation(R.animation.get("front_attack", 2, 1))
+        self._owner.set_animation(R.animation.get("front_attack", 3, 1))
 
         direction = self._enemy_position - self._owner.position
         angle = atan2(direction.y, direction.x)
 
         self._owner.rotate_to(angle)
         self._owner.shoot()
+
+        sound = R.sound.get("bot_fire.mp3")
+        self._channel.play(sound)
 
     def update(self, dt: float) -> None:
         """Do nothing"""
@@ -53,9 +63,14 @@ class AttackAction(AbstractAction):
 class DieAction(AbstractAction):
     def __init__(self, owner: AbstractIntelligent) -> None:
         self._owner = owner
+        self._channel = pg.mixer.Channel(4)
+        self._channel.set_volume(settings.volume / 100)
 
     def apply(self) -> None:
         self._owner.set_animation(R.animation.get("die", 5, 1))
+
+        sound = R.sound.get("bot_death.mp3")
+        self._channel.play(sound)
 
     def update(self, dt: float) -> None:
         if self._owner.animation_done:
@@ -67,7 +82,33 @@ class DieAction(AbstractAction):
 
 
 class DiagonalChaseAction(AbstractAction):
-    pass
+    epsilon: Final[float] = 1e-1
+    minimal_distance: Final[float] = 1.5
+    chase_speed: Final[float] = 0.35
+
+    def __init__(self, owner: AbstractIntelligent) -> None:
+        self._owner = owner
+
+    def apply(self) -> None:
+        animation = R.animation.get("front_walk", 5, 1)
+        self._owner.set_animation(animation)
+
+        self.path = self._owner.enemy.position - self._owner.position
+        self.path.scale_to_length(2)
+        self.dest = self.path + self._owner.position
+
+    def update(self, dt: float) -> None:
+        point = self._owner.position + self.path * self.chase_speed * dt
+        self._owner.move_to(point)
+
+    @property
+    def done(self) -> bool:
+        end = self.dest - self._owner.position
+        return (
+            end.magnitude() < self.epsilon
+            or self._owner.wall_nearby
+            or self._owner.player_nearby
+        )
 
 
 class AStarChaseAction(AbstractAction):
@@ -95,12 +136,7 @@ class AStarChaseAction(AbstractAction):
 
     @property
     def done(self) -> bool:
-        # assert self._path
-        enemy_vector = self._owner.enemy.position - self._owner.position
-        return (
-            self._point_index >= len(self._path) - 1
-            or enemy_vector.magnitude() < self.minimal_distance
-        )
+        return self._point_index >= len(self._path) or self._owner.player_nearby
 
     @property
     def current_point(self) -> Point:

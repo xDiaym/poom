@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Collection, Final
+from typing import Collection
 
 import pygame as pg
 
@@ -7,7 +7,7 @@ from poom.animated import Animation
 from poom.entities import Pawn, Renderable
 from poom.gun.gun import Gun
 from poom.level import Map
-from poom.settings import ROOT
+from poom.resources import R
 
 
 class PlayerGun(Renderable):
@@ -15,9 +15,6 @@ class PlayerGun(Renderable):
 
     Used as player gun.
     """
-
-    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "player_ssg.mp3"
-    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(self, gun: Gun, animation: Animation) -> None:
         """Initialize animated gun.
@@ -27,7 +24,7 @@ class PlayerGun(Renderable):
         """
         self._gun = gun
         self._animation = animation
-        self.channel = pg.mixer.Channel(2)
+        self._channel = pg.mixer.Channel(2)
 
     def shoot(
         self,
@@ -41,8 +38,9 @@ class PlayerGun(Renderable):
         :param angle: shooter angle
         :param enemies: enemies
         """
-        if not self.channel.get_busy():
-            self.channel.play(self.sound)
+        if not self._channel.get_busy():
+            sound = R.sound.get("player_ssg.mp3")
+            self._channel.play(sound)
         self._gun.shoot(position, angle, enemies)
 
     @property

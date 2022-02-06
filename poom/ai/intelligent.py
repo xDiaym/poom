@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List
 
 import pygame as pg
 
@@ -36,7 +36,7 @@ class AbstractIntelligent(Pawn, ABC):
 
     @abstractmethod
     def can_cause_damage(self) -> bool:
-        """Return true if can cause damage to enemy, otherwise false"""
+        """Return true if can cause damage to enemy, otherwise false."""
 
     @property
     @abstractmethod
@@ -55,5 +55,15 @@ class AbstractIntelligent(Pawn, ABC):
 
     @property
     @abstractmethod
+    def player_nearby(self) -> bool:
+        """Checks if the npc is near the player."""
+
+    @property
+    @abstractmethod
     def map_(self) -> Map:
         """Return level map."""
+
+    @property
+    @abstractmethod
+    def whether_shoot(self) -> bool:
+        """Controls alternate firing in between walks."""

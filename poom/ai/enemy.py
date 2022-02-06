@@ -1,4 +1,3 @@
-from math import atan2
 from random import random
 from typing import Any, Final, List
 
@@ -12,6 +11,7 @@ from poom.animated import Animation
 from poom.entities import Entity, Pawn, Renderable
 from poom.gun.gun import Gun
 from poom.level import Map, map2d
+from poom.resources import R
 from poom.settings import ROOT
 from poom.shared import Settings
 from poom.viewer import Viewer
@@ -44,8 +44,11 @@ class Enemy(AbstractIntelligent, Pawn, Renderable):
         self._ai_enemy = ai_enemy
         self._texture = texture
         self._health = self.max_health
+        self._whether_shoot = False
         self._gun = Gun(map_, 1, 20)
         self._enemies = entities
+        self._channel = pg.mixer.Channel(1)
+        self._channel.set_volume(settings.volume / 100)
         self._action = make_decision(self)
         self._action.apply()
 
@@ -93,14 +96,33 @@ class Enemy(AbstractIntelligent, Pawn, Renderable):
         return False
 
     @property
+    def player_nearby(self) -> bool:
+        minimal_distance = 1.5
+        direction = self._ai_enemy.position - self.position
+        if direction.magnitude() < minimal_distance:
+            return True
+        return False
+
+    @property
     def map_(self) -> Map:
         return self.ai_map
+
+    @property
+    def whether_shoot(self) -> bool:
+        return self._whether_shoot
+
+    @whether_shoot.setter
+    def whether_shoot(self, value: bool) -> None:
+        self._whether_shoot = value
 
     def take_damage(self, damage: float) -> None:
         self._health -= damage
         if self._health <= 0:
             self._action = make_decision(self)
             self._action.apply()
+        else:
+            sound = R.sound.get("bot_injured.mp3")
+            self._channel.play(sound)
 
     def get_health(self) -> float:
         return self._health
@@ -121,6 +143,6 @@ class Enemy(AbstractIntelligent, Pawn, Renderable):
         self._gun.update(dt)
         self._action.update(dt)
 
-        if self._action.done:
+        if self._action.done and self._health > 0:
             self._action = make_decision(self)
             self._action.apply()

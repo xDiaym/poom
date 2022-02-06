@@ -40,8 +40,9 @@ class LazySoundLoader:
     def __init__(self, path) -> None:
         self._path = path
 
-    def get(self, name: str) -> None:
-        return pg.mixer.music.load(self._path / name)
+    @cache
+    def get(self, name: str) -> pg.mixer.Sound:
+        return pg.mixer.Sound(self._path / name)
 
 
 class Resources:
