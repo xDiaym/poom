@@ -90,7 +90,8 @@ def draw_walls(
         int texture_width, texture_height
         Intersection intersection
         float alpha, angle
-        int half_height, offset, x
+        int line_height, offset, x
+        int g
 
     for x in range(width):  # TODO: Can be parallel
         alpha = x / <float>width * fov
@@ -104,12 +105,14 @@ def draw_walls(
         texture_width, texture_height = texture.get_size()
 
         # TODO: fix parabola-like walls
-        half_height = <int>(height / (intersection.distance * cos(angle - view))) // 2
+        line_height = <int>(height / (intersection.distance * cos(angle - view)))
         offset = <int>(texture_width * intersection.offset)
+        g = <int>max(texture_height * (1 - height / <float>line_height) / 2, 0.0)
+        line_height = min(height, line_height)
 
-        line = texture.subsurface(offset, 0, 1, texture_height)
-        wall = pg.transform.scale(line, (1, 2 * half_height))
-        surface.blit(wall, (x, height // 2 - half_height))
+        line = texture.subsurface(offset, g, 1, texture_height - 2 * g)
+        wall = pg.transform.scale(line, (1, line_height))
+        surface.blit(wall, (x, (height - line_height) // 2))
 
 
 @cython.cdivision(True)
