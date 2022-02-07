@@ -9,7 +9,7 @@ import numpy as np
 import pygame as pg
 from numpy.typing import NDArray
 
-from poom.entities import Entity, WithHealth
+from poom.entities import Damagable, Entity
 from poom.gun.player_gun import PlayerGun
 from poom.level import Map
 from poom.pooma.ray_march import draw_sprite, draw_walls
@@ -127,7 +127,7 @@ class HUDRenderer(AbstractRenderer):
     health_bar_length: Final[int] = 200
     health_bar_height: Final[int] = 30
 
-    def __init__(self, with_health: WithHealth) -> None:
+    def __init__(self, with_health: Damagable) -> None:
         self._with_health = with_health
         self._font = pg.font.Font(None, 30)
 

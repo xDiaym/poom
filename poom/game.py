@@ -8,6 +8,7 @@ from pygame.event import Event
 pg.mixer.init()  # noqa
 
 import poom.shared as shared
+from poom.ai.enemy import Enemy
 from poom.credits import Credits
 from poom.graphics import (
     BackgroundRenderer,
@@ -22,7 +23,6 @@ from poom.graphics import (
 from poom.gun.player_gun import create_player_gun
 from poom.level import Level
 from poom.main_menu import WelcomeScene
-from poom.npc import Enemy
 from poom.player import Player
 from poom.records import Record, update_record
 from poom.settings import ROOT

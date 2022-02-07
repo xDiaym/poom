@@ -1,5 +1,4 @@
 """Describes player."""
-from pathlib import Path
 from typing import Callable, Collection, Final, Sequence
 
 import numpy as np
@@ -8,22 +7,21 @@ from numpy.typing import NDArray
 from pygame.math import Vector2
 
 import poom.shared as shared
-from poom.entities import Pawn, WithHealth
+from poom.entities import Damagable, Pawn
 from poom.gun.player_gun import PlayerGun
+from poom.resources import R
 from poom.settings import ROOT
 
 OnDeathCallback = Callable[[], None]
 settings = shared.Settings.load(ROOT)
 
 
-class Player(Pawn, WithHealth):
+class Player(Pawn, Damagable):
     """Player."""
 
     max_health: Final[float] = 100
     movement_speed: Final[float] = 5
     rotation_speed: Final[float] = 3
-    sound_path: Final[Path] = ROOT / "assets" / "sounds" / "player_injured.mp3"
-    sound: Final[pg.mixer.Sound] = pg.mixer.Sound(sound_path)
 
     def __init__(
         self,
@@ -41,7 +39,7 @@ class Player(Pawn, WithHealth):
         self._health = self.max_health
         self._enemies = enemies
         self._on_death: OnDeathCallback = lambda: None
-        self._channel = pg.mixer.Channel(1)
+        self._channel = pg.mixer.Channel(3)
         self._channel.set_volume(settings.volume / 100)
 
     def on_death(self, cb: OnDeathCallback) -> None:
@@ -66,7 +64,8 @@ class Player(Pawn, WithHealth):
 
         :param damage: damage by which health is reduced
         """
-        self._channel.play(self.sound)
+        sound = R.sound.get("player_injured.mp3")
+        self._channel.play(sound)
         self._health -= damage
         if self._health <= 0:
             self._on_death()
@@ -76,7 +75,7 @@ class Player(Pawn, WithHealth):
         return self._health
 
     def get_health_ratio(self) -> float:
-        """Return ration between current health and max health."""
+        """Return ratio between current health and max health."""
         return self._health / self.max_health
 
     def _move(self, dt: float, keys: Sequence[bool]) -> None:
