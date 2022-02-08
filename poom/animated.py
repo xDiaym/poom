@@ -4,9 +4,15 @@ from pathlib import Path
 from typing import List
 
 import pygame as pg
+from typing_extensions import Self
 
 
-class Animation:
+class Clonable:
+    def clone(self) -> Self:
+        """Clone object."""
+
+
+class Animation(Clonable):
     """Changes the animation frame depending on the time."""
 
     def __init__(self, images: List[pg.Surface], speed: float) -> None:
@@ -27,6 +33,9 @@ class Animation:
 
     def reset(self) -> None:
         self._animation_rate = 0
+
+    def clone(self) -> "Animation":
+        return Animation(self._images, self._speed)
 
     @property
     def done(self) -> float:
