@@ -1,3 +1,5 @@
+
+
 # Poom
 
 Yandex.Lyceum PyGame project
@@ -43,6 +45,6 @@ python setup.py build_ext --inplace
 | `A`       | Rotate left   |
 | `S`       | Move backward |
 | `D`       | Rotate right  |
-| `<`       | Move left     |
-| `>`       | Move right    |
+| `,`       | Move left     |
+| `.`       | Move right    |
 | `<space>` | Shoot         |
